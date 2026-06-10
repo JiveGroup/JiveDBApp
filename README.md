@@ -126,6 +126,12 @@ Lấy bản dựng mới nhất cho nền tảng của bạn từ trang **[Relea
 
 **Windows** — chạy `JiveDB-windows-amd64.exe` (hoặc bản `-arm64`). Nếu hiện cảnh báo SmartScreen, bấm **More info → Run anyway** (bản dựng hiện chưa code‑signed).
 
+> **Yêu cầu WebView2 Runtime.** JiveDB dùng **Microsoft Edge WebView2** để hiển thị giao diện. Windows 11 (và đa số Windows 10 đã cập nhật) có sẵn runtime này. Nếu ứng dụng không mở được hoặc hiện màn hình trắng, hãy tải và cài **Evergreen WebView2 Runtime** (miễn phí) từ Microsoft:
+>
+> - Trang tải: https://developer.microsoft.com/en-us/microsoft-edge/webview2
+> - Chọn **Evergreen Bootstrapper** → tải về và chạy `MicrosoftEdgeWebview2Setup.exe`, làm theo hướng dẫn.
+> - Cài xong, khởi chạy lại JiveDB.
+
 **Linux** — giải nén archive rồi chạy `install.sh` (thêm launcher kèm icon vào menu ứng dụng, không cần sudo):
 
 ```bash
