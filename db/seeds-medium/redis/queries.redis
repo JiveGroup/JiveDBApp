@@ -1,0 +1,15 @@
+# Redis — lệnh DEMO (~5000 key, tiền tố 'm:'). Trong tab Redis: ⌘/Ctrl+R chạy dòng đang chọn.
+DBSIZE
+SCAN 0 MATCH m:str:* COUNT 200
+GET m:str:1
+STRLEN m:str:1
+TYPE m:user:1
+HGETALL m:user:1
+HKEYS m:user:1
+LRANGE m:list:1 0 -1
+LLEN m:list:1
+SMEMBERS m:set:1
+SCARD m:set:1
+ZREVRANGE m:rank:1 0 9 WITHSCORES
+ZCARD m:rank:1
+

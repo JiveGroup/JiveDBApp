@@ -1,0 +1,63 @@
+# Hạ tầng CSDL phục vụ test thủ công backend (KHÔNG dùng cho production).
+# Thông tin đăng nhập dưới đây chỉ là giá trị test cục bộ.
+#   docker compose up -d
+#
+# Dữ liệu mẫu tự nạp khi container khởi tạo LẦN ĐẦU:
+#   - PostgreSQL / MySQL: chạy *.sql trong db/<bộ>/<db>/ qua /docker-entrypoint-initdb.d
+#   - Redis: service "redis-seed" nạp db/<bộ>/redis/seed.redis sau khi redis sẵn sàng
+# Bộ dữ liệu MẶC ĐỊNH = seeds-medium (tầm trung). Đổi bộ qua biến JDB_SEED:
+#   JDB_SEED=seeds            docker compose up -d   # bộ nhỏ
+#   JDB_SEED=seeds-medium     docker compose up -d   # bộ tầm trung
+# Nạp lại từ đầu (xoá volume cũ):  docker compose down -v && docker compose up -d
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: jdb # khớp owner trong dump (OWNER TO protct) để init không lỗi
+      POSTGRES_PASSWORD: jdbtest
+      POSTGRES_DB: jdb_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/${JDB_SEED:-seeds}/postgres:/docker-entrypoint-initdb.d:ro
+
+  # Truy cập ở host qua cổng 5433. Nạp lại từ đầu: docker compose down -v && docker compose up -d
+  postgres18:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: jdb # khớp owner trong dump (OWNER TO protct) để init không lỗi
+      POSTGRES_PASSWORD: jdbtest
+      POSTGRES_DB: jdb_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./db/${JDB_SEED:-seeds}/postgres:/docker-entrypoint-initdb.d:ro
+
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: jdbtest
+      MYSQL_DATABASE: jdb_dev
+      MYSQL_USER: jdb
+      MYSQL_PASSWORD: jdbtest
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/${JDB_SEED:-seeds}/mysql:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  # One-shot: nạp dữ liệu mẫu vào Redis rồi thoát.
+  redis-seed:
+    image: redis:7
+    depends_on:
+      - redis
+    volumes:
+      - ./db/${JDB_SEED:-seeds}/redis:/seed:ro
+    restart: "no"
+    command: >
+      sh -c "until redis-cli -h redis ping >/dev/null 2>&1; do sleep 1; done;
+             redis-cli -h redis < /seed/seed.redis && echo 'redis seeded'"

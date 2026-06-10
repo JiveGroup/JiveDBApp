@@ -1,0 +1,60 @@
+# ============================================================================
+#  Redis — Lệnh DEMO (chạy trên dữ liệu mẫu seed.redis)
+#  Trong tab Redis: mỗi dòng một lệnh, ⌘/Ctrl+R để chạy dòng/đoạn đang chọn.
+#  Khoá mẫu: user:N, cart:N, order:N (hash) · feed:user:N (list)
+#            tags:product:N (set) · leaderboard:wkN (zset)
+#            product:N:views, rate:ip:N, session:tokN (string)
+# ============================================================================
+
+# --- Tổng quan ---
+DBSIZE
+PING
+
+# --- Duyệt khoá (an toàn, không dùng KEYS trên DB lớn) ---
+SCAN 0 MATCH user:* COUNT 200
+SCAN 0 MATCH order:* COUNT 200
+KEYS leaderboard:*
+
+# --- String ---
+GET product:1:views
+INCR product:1:views
+TTL session:tok1
+SET demo:hello "xin chao" EX 60
+GET demo:hello
+
+# --- Hash (user / order / cart) ---
+TYPE user:1
+HGETALL user:1
+HGET user:1 email
+HKEYS user:1
+HSET user:1 plan pro
+HGETALL order:1
+
+# --- List (feed) ---
+LLEN feed:user:1
+LRANGE feed:user:1 0 9
+LRANGE feed:user:1 0 -1
+LPUSH feed:user:1 "event:demo"
+
+# --- Set (tags) ---
+SMEMBERS tags:product:1
+SCARD tags:product:1
+SISMEMBER tags:product:1 sale
+SADD tags:product:1 demo
+
+# --- Sorted set (leaderboard) ---
+ZCARD leaderboard:wk1
+ZRANGE leaderboard:wk1 0 9 WITHSCORES
+ZREVRANGE leaderboard:wk1 0 4 WITHSCORES
+ZSCORE leaderboard:wk1 user:1
+ZADD leaderboard:wk1 999 user:1
+
+# --- Key / TTL ---
+EXPIRE demo:hello 120
+PERSIST demo:hello
+RENAME demo:hello demo:hi
+DEL demo:hi
+
+# --- Server ---
+INFO server
+CONFIG GET maxmemory
