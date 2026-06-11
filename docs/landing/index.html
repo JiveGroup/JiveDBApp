@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-accent="violet">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary meta -->
+    <title>JiveDB — One client for all your databases</title>
+    <meta name="title" content="JiveDB — One client for all your databases" />
+    <meta name="description" content="JiveDB is a fast, native desktop client for PostgreSQL, MySQL, SQLite and Redis — with a real SQL editor, a fast data grid, live ERD diagrams and a built-in AI assistant." />
+    <meta name="keywords" content="JiveDB, database client, SQL editor, PostgreSQL, MySQL, SQLite, Redis, ERD diagram, data grid, native database GUI, cross-platform" />
+    <meta name="author" content="JiveDB" />
+    <meta name="application-name" content="JiveDB" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://jivedb.com/" />
+
+    <!-- Favicons -->
+    <link rel="icon" href="../brand/favicons/favicon.ico" sizes="any" />
+    <link rel="icon" href="../brand/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../brand/favicons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../brand/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../brand/favicons/favicon-96x96.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../brand/favicons/apple-touch-icon.png" />
+    <link rel="manifest" href="../brand/favicons/site.webmanifest" />
+
+    <!-- Platform / PWA -->
+    <meta name="theme-color" content="#0B1020" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F6F8FC" media="(prefers-color-scheme: light)" />
+    <meta name="apple-mobile-web-app-title" content="JiveDB" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JiveDB" />
+    <meta property="og:title" content="JiveDB — One client for all your databases" />
+    <meta property="og:description" content="A fast, native client for PostgreSQL, MySQL, SQLite & Redis — SQL editor, data grid, ERD diagrams and an AI assistant." />
+    <meta property="og:url" content="https://jivedb.com/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="vi_VN" />
+    <meta property="og:image" content="https://jivedb.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="JiveDB — one client for PostgreSQL, MySQL, SQLite & Redis" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JiveDB — One client for all your databases" />
+    <meta name="twitter:description" content="A fast, native client for PostgreSQL, MySQL, SQLite & Redis — SQL editor, data grid, ERD diagrams and an AI assistant." />
+    <meta name="twitter:image" content="https://jivedb.com/og-image.jpg" />
+
+    <!-- Fonts + styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "JiveDB",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "macOS, Windows, Linux",
+        "description": "One client for all your databases — PostgreSQL, MySQL, SQLite & Redis. SQL editor, data grid, ERD diagrams and a built-in AI assistant.",
+        "url": "https://jivedb.com/",
+        "image": "https://jivedb.com/og-image.jpg",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "author": { "@type": "Organization", "name": "JiveDB", "url": "https://jivedb.com/" }
+      }
+    </script>
+  </head>
+  <body id="top">
+    <!-- ── Background decor ─────────────────────────────────────────────── -->
+    <div class="bg" aria-hidden="true">
+      <div class="bg__grid"></div>
+      <div class="bg__blob bg__blob--1"></div>
+      <div class="bg__blob bg__blob--2"></div>
+      <div class="bg__blob bg__blob--3"></div>
+    </div>
+
+    <!-- ── Nav ──────────────────────────────────────────────────────────── -->
+    <header class="nav" id="nav">
+      <div class="wrap nav__inner">
+        <a class="brand" href="#top" aria-label="JiveDB home">
+          <svg class="brand__mark" viewBox="0 0 512 512" width="56" height="56" aria-hidden="true">
+            <defs>
+              <linearGradient id="navMark" x1="146" y1="110" x2="366" y2="402" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6366F1" />
+                <stop offset="1" stop-color="#8B5CF6" />
+              </linearGradient>
+            </defs>
+            <path d="M161 165 V347 A95 34 0 0 0 351 347 V165 Z" fill="url(#navMark)" />
+            <ellipse cx="256" cy="165" rx="95" ry="34" fill="url(#navMark)" />
+            <g fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="6" stroke-linecap="round">
+              <path d="M161 226 A95 34 0 0 0 351 226" />
+              <path d="M161 287 A95 34 0 0 0 351 287" />
+            </g>
+            <path d="M372 82 C376 106 388 118 412 122 C388 126 376 138 372 162 C368 138 356 126 332 122 C356 118 368 106 372 82 Z" fill="#FBBF24" />
+          </svg>
+          <span class="brand__name">Jive<span class="brand__db">DB</span></span>
+        </a>
+
+        <nav class="nav__links" id="navLinks">
+          <a href="#editor" data-i18n="nav_editor">Editor</a>
+          <a href="#grid" data-i18n="nav_grid">Data grid</a>
+          <a href="#erd">ERD</a>
+          <a href="#ai">AI</a>
+          <a href="#customize" data-i18n="nav_customize">Customize</a>
+          <a href="#export" data-i18n="nav_export">Export</a>
+          <a href="#feedback" data-i18n="nav_feedback">Feedback</a>
+          <a href="#engines" data-i18n="nav_engines">Engines</a>
+
+          <a class="btn btn--primary" href="#download" data-open="dlModal" data-i18n="nav_download">Download free</a>
+        </nav>
+
+        <button class="nav__toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+          <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ── Hero ───────────────────────────────────────────────────────── -->
+      <section class="hero wrap">
+        <div class="hero__copy reveal">
+          <span class="pill"><span class="pill__dot"></span> <span data-i18n="hero_pill">One native binary · PostgreSQL · MySQL · SQLite · Redis</span></span>
+          <h1 class="hero__title" data-i18n-html="hero_title">
+            One client for <span class="ink">all your <em>databases</em></span>.
+          </h1>
+          <p class="hero__sub" data-i18n-html="hero_sub">
+            Browse, query and design across <b>PostgreSQL</b>, <b>MySQL</b>,
+            <b>SQLite</b> and <b>Redis</b> — with a real SQL editor, a fast data
+            grid, live ERD diagrams and a built-in AI assistant.
+          </p>
+          <div class="cta">
+            <a class="btn btn--primary btn--lg" href="#download" data-open="dlModal">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" />
+              </svg>
+              <span data-i18n="hero_cta1">Download free</span>
+            </a>
+            <a class="btn btn--soft btn--lg" href="#editor" data-i18n="hero_cta2">See it in action ↓</a>
+          </div>
+          <ul class="stats">
+            <li><b data-count="4">0</b><span data-i18n="stat_engines">DB engines</span></li>
+            <li><b data-count="1">0</b><span data-i18n="stat_native">Native binary</span></li>
+            <li><b data-count="100" data-suffix="%">0</b><span data-i18n="stat_kbd">Keyboard-driven</span></li>
+            <li><b data-count="0">0</b><span data-i18n="stat_tel">Telemetry</span></li>
+          </ul>
+        </div>
+
+        <!-- Floating app window (animated) -->
+        <div class="hero__app reveal" id="heroApp">
+          <div class="win win--float">
+            <div class="win__bar">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="win__title">JiveDB — app_production</span>
+            </div>
+            <div class="win__body">
+              <aside class="tree">
+                <div class="tree__row tree__row--root"><span class="ic ic--pg"></span> app_production</div>
+                <div class="tree__row tree__row--in"><span class="ic ic--folder"></span> public</div>
+                <div class="tree__row tree__row--in2 is-active"><span class="ic ic--table"></span> users</div>
+                <div class="tree__row tree__row--in2"><span class="ic ic--table"></span> orders</div>
+                <div class="tree__row tree__row--in2"><span class="ic ic--table"></span> products</div>
+                <div class="tree__row tree__row--in2"><span class="ic ic--table"></span> payments</div>
+              </aside>
+              <div class="pane">
+                <div class="mini-tabs">
+                  <span class="mini-tab is-active">Query 1</span>
+                  <span class="mini-tab">users</span>
+                </div>
+                <pre class="mini-code"><code><span class="k">select</span> id, name, email, plan
+<span class="k">from</span> users
+<span class="k">where</span> plan = <span class="s">'pro'</span>
+<span class="k">order by</span> created_at <span class="k">desc</span>;</code></pre>
+                <div class="mini-grid" id="heroGrid"></div>
+              </div>
+            </div>
+          </div>
+          <div class="badge-float badge-float--a">⚡ 12 ms</div>
+          <div class="badge-float badge-float--b">⌘↵ Run</div>
+        </div>
+      </section>
+
+      <!-- ── 01 · SQL Editor ────────────────────────────────────────────── -->
+      <section class="section wrap" id="editor">
+        <div class="feat">
+          <div class="feat__copy reveal">
+            <span class="num">01</span>
+            <h2 data-i18n-html="s01_h">A real <em>SQL editor</em>, not a textarea</h2>
+            <p data-i18n="s01_p">
+              Syntax highlighting, smart autocomplete and multi-statement
+              execution. Run the whole script or just the selection, then read
+              results in a grid that never blocks the UI.
+            </p>
+            <ul class="ticks">
+              <li data-i18n="s01_t1">Dialect-aware completion for every engine</li>
+              <li data-i18n="s01_t2">Format, explain & optimize in one click</li>
+              <li data-i18n="s01_t3">Query history with favorites you can re-run</li>
+            </ul>
+          </div>
+          <div class="feat__demo reveal">
+            <div class="win">
+              <div class="win__bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="win__title">SQL Editor</span>
+              </div>
+              <div class="editor">
+                <div class="editor__gutter" id="gutter">1</div>
+                <pre class="editor__code"><code id="typed"></code><span class="caret"></span></pre>
+              </div>
+              <div class="toolbar">
+                <button class="run" id="runBtn">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                  Run <kbd>⌘↵</kbd>
+                </button>
+                <span class="toolbar__status" id="runStatus"></span>
+              </div>
+              <div class="result" id="editorResult"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 02 · Data grid ─────────────────────────────────────────────── -->
+      <section class="section wrap" id="grid">
+        <div class="feat feat--rev">
+          <div class="feat__copy reveal">
+            <span class="num">02</span>
+            <h2 data-i18n-html="s02_h">A data grid that <em>flies</em></h2>
+            <p data-i18n="s02_p">
+              Virtualized rendering keeps millions of rows smooth. Edit inline,
+              copy cells, and commit changes as reviewable SQL — no surprises.
+            </p>
+            <ul class="ticks">
+              <li data-i18n="s02_t1">Inline editing with generated UPDATE preview</li>
+              <li data-i18n="s02_t2">Sort, filter and paginate instantly</li>
+              <li data-i18n="s02_t3">NULL-aware, big-number safe rendering</li>
+            </ul>
+          </div>
+          <div class="feat__demo reveal">
+            <div class="win">
+              <div class="win__bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="win__title">users · 1,284,902 rows</span>
+              </div>
+              <div class="bigrid" id="bigrid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 03 · ERD ───────────────────────────────────────────────────── -->
+      <section class="section wrap" id="erd">
+        <div class="feat">
+          <div class="feat__copy reveal">
+            <span class="num">03</span>
+            <h2 data-i18n-html="s03_h">See your schema as an <em>ERD</em></h2>
+            <p data-i18n="s03_p">
+              Relationships drawn live from your foreign keys. Drag tables, edit
+              structure, and export the diagram as SVG to share with the team.
+            </p>
+            <ul class="ticks">
+              <li data-i18n="s03_t1">Auto-layout from real foreign keys</li>
+              <li data-i18n="s03_t2">Edit columns, indexes & FKs visually</li>
+              <li data-i18n="s03_t3">One-click SVG export</li>
+            </ul>
+          </div>
+          <div class="feat__demo reveal">
+            <div class="win">
+              <div class="win__bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="win__title">ERD Diagram</span>
+              </div>
+              <div class="erd" id="erdCanvas"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 04 · AI assistant ──────────────────────────────────────────── -->
+      <section class="section wrap" id="ai">
+        <div class="feat feat--rev">
+          <div class="feat__copy reveal">
+            <span class="num">04</span>
+            <h2 data-i18n-html="s04_h">An <em>AI assistant</em> that speaks SQL</h2>
+            <p data-i18n="s04_p">
+              Describe what you need in plain language; get back ready-to-run
+              SQL. Explain, fix or optimize a query — bring your own provider
+              and keys.
+            </p>
+            <ul class="ticks">
+              <li data-i18n="s04_t1">Natural language → SQL</li>
+              <li data-i18n="s04_t2">Explain, fix & optimize inline</li>
+              <li data-i18n="s04_t3">Multi-provider, keys encrypted at rest</li>
+            </ul>
+          </div>
+          <div class="feat__demo reveal">
+            <div class="win">
+              <div class="win__bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="win__title">AI Assistant</span>
+              </div>
+              <div class="chat" id="chat"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 05 · Customize (lang · themes · mode) ───────────────────────── -->
+      <section class="section wrap" id="customize">
+        <div class="feat">
+          <div class="feat__copy reveal">
+            <span class="num">05</span>
+            <h2 data-i18n-html="s06_h">Make it <em>yours</em></h2>
+            <p data-i18n="s06_p">Two languages, seven color tones and light or dark — switch live, your choice is remembered.</p>
+            <ul class="ticks">
+              <li data-i18n="s06_t1">English & Vietnamese (i18n)</li>
+              <li data-i18n="s06_t2">7 accent themes</li>
+              <li data-i18n="s06_t3">Light & dark mode</li>
+            </ul>
+          </div>
+          <div class="feat__demo reveal">
+            <div class="appearance">
+              <p class="appearance__hint" data-i18n="s06_try">Try it — these controls change this page:</p>
+
+              <div class="ap-row">
+                <span class="ap-label" data-i18n="ctl_lang">Language</span>
+                <div class="seg" id="langSeg">
+                  <button data-lang="en">English</button>
+                  <button data-lang="vi">Tiếng Việt</button>
+                </div>
+              </div>
+
+              <div class="ap-row">
+                <span class="ap-label" data-i18n="ctl_accent">Accent</span>
+                <div class="swatches swatches--lg" id="swatchesPanel"></div>
+              </div>
+
+              <div class="ap-row">
+                <span class="ap-label">Mode</span>
+                <div class="seg" id="modeSeg">
+                  <button data-mode="light" data-i18n="ctl_light">Light</button>
+                  <button data-mode="dark" data-i18n="ctl_dark">Dark</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 06 · Export ────────────────────────────────────────────────── -->
+      <section class="section wrap" id="export">
+        <div class="feat feat--rev">
+          <div class="feat__copy reveal">
+            <span class="num">06</span>
+            <h2 data-i18n-html="s07_h">Export <em>anything</em></h2>
+            <p data-i18n="s07_p">Take your work with you. Diagrams as SVG, result sets as CSV or JSON — one click, native save dialog.</p>
+            <ul class="ticks">
+              <li data-i18n="s07_t1">ERD diagram → SVG</li>
+              <li data-i18n="s07_t2">Data → CSV</li>
+              <li data-i18n="s07_t3">Data → JSON</li>
+            </ul>
+          </div>
+          <div class="feat__demo reveal">
+            <div class="win">
+              <div class="win__bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="win__title">Export</span>
+              </div>
+              <div class="export">
+                <div class="export__btns">
+                  <button class="xbtn" data-file="jivedb-erd.svg" data-kind="svg">SVG</button>
+                  <button class="xbtn" data-file="users.csv" data-kind="csv">CSV</button>
+                  <button class="xbtn" data-file="users.json" data-kind="json">JSON</button>
+                </div>
+                <div class="export__files" id="exportFiles"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 07 · Feedback system ───────────────────────────────────────── -->
+      <section class="section wrap" id="feedback">
+        <div class="feat">
+          <div class="feat__copy reveal">
+            <span class="num">07</span>
+            <h2 data-i18n-html="s08_h">We're <em>listening</em></h2>
+            <p data-i18n="s08_p">A rich, built-in feedback system. Reach out for support, share a suggestion, send feedback or ask a question — with screenshots attached.</p>
+            <ul class="ticks">
+              <li data-i18n="s08_t1">Support & help</li>
+              <li data-i18n="s08_t2">Suggestions</li>
+              <li data-i18n="s08_t3">Feedback</li>
+              <li data-i18n="s08_t4">Questions</li>
+            </ul>
+          </div>
+          <div class="feat__demo reveal">
+            <div class="win">
+              <div class="win__bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="win__title" id="fbTitle">Send feedback</span>
+              </div>
+              <div class="fb">
+                <div class="fb__types" id="fbTypes">
+                  <button data-type="support" class="is-active">
+                    <span class="fb__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></svg></span>
+                    <span data-i18n="type_support">Support</span>
+                  </button>
+                  <button data-type="suggestion">
+                    <span class="fb__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg></span>
+                    <span data-i18n="type_suggestion">Suggestion</span>
+                  </button>
+                  <button data-type="feedback">
+                    <span class="fb__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                    <span data-i18n="type_feedback">Feedback</span>
+                  </button>
+                  <button data-type="question">
+                    <span class="fb__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a3 3 0 0 1 5.6 1c0 2-2.8 2.5-2.8 4"/><path d="M12 17h.01"/></svg></span>
+                    <span data-i18n="type_question">Question</span>
+                  </button>
+                </div>
+                <div class="fb__field" id="fbField" data-i18n="fb_ph">Describe it here…</div>
+                <div class="fb__foot">
+                  <span class="fb__attach" data-i18n="fb_attach">📎 Attach screenshot</span>
+                  <button class="fb__send" data-i18n="fb_send">Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 08 · Engines ───────────────────────────────────────────────── -->
+      <section class="section wrap" id="engines">
+        <div class="section__head reveal">
+          <span class="num num--center">08</span>
+          <h2 data-i18n-html="s05_h">Four engines, <em>one workflow</em></h2>
+          <p data-i18n="s05_p">Same tree, same grid, same shortcuts — across every connection.</p>
+        </div>
+        <div class="flow reveal" id="flowDiagram"></div>
+      </section>
+
+      <!-- ── Features strip ─────────────────────────────────────────────── -->
+      <section class="section wrap">
+        <div class="features" id="featureGrid"></div>
+      </section>
+
+      <!-- ── CTA ────────────────────────────────────────────────────────── -->
+      <section class="wrap" id="download">
+        <div class="cta-box reveal">
+          <h2 data-i18n="cta_h">Ready to query?</h2>
+          <p data-i18n="cta_p">One download. PostgreSQL, MySQL, SQLite and Redis — out of the box.</p>
+          <div class="cta cta--center">
+            <a class="btn btn--primary btn--lg" href="#download" data-open="dlModal" data-i18n="cta_b1">Get JiveDB</a>
+            <a class="btn btn--soft btn--lg" href="#" data-open="contactModal" data-i18n="cta_b2">Other request</a>
+          </div>
+          <div class="cta-box__os">
+            <span>● macOS</span><span>● Windows</span><span>● Linux</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── Footer ───────────────────────────────────────────────────────── -->
+    <footer class="footer wrap">
+      <a class="brand" href="#top" aria-label="JiveDB home">
+        <svg class="brand__mark" viewBox="0 0 512 512" width="56" height="56" aria-hidden="true">
+          <defs>
+            <linearGradient id="ftMark" x1="146" y1="110" x2="366" y2="402" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6366F1" /><stop offset="1" stop-color="#8B5CF6" />
+            </linearGradient>
+          </defs>
+          <path d="M161 165 V347 A95 34 0 0 0 351 347 V165 Z" fill="url(#ftMark)" />
+          <ellipse cx="256" cy="165" rx="95" ry="34" fill="url(#ftMark)" />
+          <g fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="6" stroke-linecap="round">
+            <path d="M161 226 A95 34 0 0 0 351 226" />
+            <path d="M161 287 A95 34 0 0 0 351 287" />
+          </g>
+          <path d="M372 82 C376 106 388 118 412 122 C388 126 376 138 372 162 C368 138 356 126 332 122 C356 118 368 106 372 82 Z" fill="#FBBF24" />
+        </svg>
+        <span class="brand__name">Jive<span class="brand__db">DB</span></span>
+      </a>
+      <p class="footer__note" data-i18n="footer_note">Built with Wails, React &amp; Go.</p>
+      <p class="footer__copy">© <span id="year"></span> JiveDB</p>
+    </footer>
+
+    <!-- ── Download modal ───────────────────────────────────────────────── -->
+    <div class="modal" id="dlModal" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="dlTitle">
+        <button class="modal__x" data-close aria-label="Close">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+        <h3 class="modal__title" id="dlTitle" data-i18n="dl_title">Download JiveDB</h3>
+        <p class="modal__sub" data-i18n="dl_sub">Free, no sign-up. Choose your platform.</p>
+        <div class="os-list">
+          <a class="os" href="#" target="_blank" rel="noopener">
+            <span class="os__ic">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M16.365 1.43c0 1.14-.42 2.2-1.12 3-.78.9-2.06 1.6-3.12 1.52-.13-1.1.43-2.27 1.1-3 .76-.82 2.1-1.45 3.14-1.52zM20.5 17.2c-.5 1.15-.74 1.66-1.38 2.68-.9 1.42-2.16 3.2-3.73 3.2-1.4 0-1.76-.92-3.66-.9-1.9.01-2.3.92-3.7.9-1.57 0-2.77-1.6-3.67-3.02C1.2 16.6.97 12 2.6 9.6c1.15-1.72 2.97-2.72 4.68-2.72 1.74 0 2.84.96 4.28.96 1.4 0 2.25-.96 4.28-.96 1.53 0 3.15.83 4.3 2.27-3.78 2.07-3.16 7.46.36 8.05z"/></svg>
+            </span>
+            <span class="os__txt"><b>macOS</b><span class="os__meta" data-i18n="dl_mac">Universal · Apple Silicon & Intel</span></span>
+            <svg class="os__arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+          </a>
+          <a class="os" href="#" target="_blank" rel="noopener">
+            <span class="os__ic">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M3 5.5l7.2-1v7.3H3V5.5zM11.4 4.3 21 3v9.3h-9.6V4.3zM3 13.2h7.2v7.2L3 19.4v-6.2zM11.4 13.2H21V21l-9.6-1.3v-6.5z"/></svg>
+            </span>
+            <span class="os__txt"><b>Windows</b><span class="os__meta" data-i18n="dl_win">64-bit · Windows 10/11</span></span>
+            <svg class="os__arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+          </a>
+          <a class="os" href="#" target="_blank" rel="noopener">
+            <span class="os__ic">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M12 2c2.1 0 3.3 1.8 3.3 4 0 1.3.5 2 1.4 3.1 1 1.3 2.1 2.6 2.1 4.6 0 1-.5 1.6-1.3 1.9.3.9 1.4 1.6 2.3 2.2.6.4.9.8.9 1.3 0 .8-.9 1.1-2.3 1.4-1.3.2-2.2.6-2.9 1-.6.3-1.2.5-1.8.5s-1.2-.2-1.8-.5c-.7-.4-1.6-.8-2.9-1-1.4-.3-2.3-.6-2.3-1.4 0-.5.3-.9.9-1.3.9-.6 2-1.3 2.3-2.2-.8-.3-1.3-.9-1.3-1.9 0-2 1.1-3.3 2.1-4.6.9-1.1 1.4-1.8 1.4-3.1 0-2.2 1.2-4 3.3-4z"/></svg>
+            </span>
+            <span class="os__txt"><b>Linux</b><span class="os__meta" data-i18n="dl_linux">AppImage · x86_64 & ARM64</span></span>
+            <svg class="os__arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Contact modal ────────────────────────────────────────────────── -->
+    <div class="modal" id="contactModal" hidden>
+      <div class="modal__backdrop" data-close></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="ctTitle">
+        <button class="modal__x" data-close aria-label="Close">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+        <h3 class="modal__title" id="ctTitle" data-i18n="ct_title">Get in touch</h3>
+        <p class="modal__sub" data-i18n="ct_sub">Questions, partnerships or anything else — send us a note.</p>
+        <form class="ct-form" id="ctForm">
+          <input class="ct-input" type="text" data-i18n-ph="ct_name" placeholder="Your name" />
+          <input class="ct-input" type="email" data-i18n-ph="ct_email" placeholder="Email address" />
+          <textarea class="ct-input" rows="4" data-i18n-ph="ct_msg" placeholder="How can we help?"></textarea>
+          <button class="btn btn--primary btn--lg ct-send" type="submit" data-i18n="ct_send">Send message</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="js/app.js" defer></script>
+  </body>
+</html>

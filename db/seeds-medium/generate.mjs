@@ -40,8 +40,8 @@ const CODES = ['SKU', 'REF', 'ORD', 'TKT', 'INV', 'LOT', 'BIN']
 
 // ── Quy mô ─────────────────────────────────────────────────────────────────────────
 const TABLE_COUNT = 100
-const ROWS_MIN = 20
-const ROWS_MAX = 150
+const ROWS_MIN = 800
+const ROWS_MAX = 3000
 const REDIS_KEYS = 5000
 
 // ── Quote/escape ───────────────────────────────────────────────────────────────────

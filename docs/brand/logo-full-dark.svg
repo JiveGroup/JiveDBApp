@@ -1,0 +1,24 @@
+<svg width="238" height="100" viewBox="0 0 238 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JiveDB">
+  <defs>
+    <linearGradient id="mark" x1="146" y1="110" x2="366" y2="402" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mark -->
+  <g transform="translate(-18.2 3.7) scale(0.2)">
+    <path d="M161 165 V347 A95 34 0 0 0 351 347 V165 Z" fill="url(#mark)"/>
+    <ellipse cx="256" cy="165" rx="95" ry="34" fill="url(#mark)"/>
+    <g fill="none" stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="6" stroke-linecap="round">
+      <path d="M161 226 A95 34 0 0 0 351 226"/>
+      <path d="M161 287 A95 34 0 0 0 351 287"/>
+    </g>
+    <path d="M372 82 C376 106 388 118 412 122 C388 126 376 138 372 162 C368 138 356 126 332 122 C356 118 368 106 372 82 Z" fill="#FBBF24"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="68" y="72" font-family="Geist, Inter, 'Segoe UI', system-ui, sans-serif" font-size="46" font-weight="800" letter-spacing="-1">
+    <tspan fill="#FFFFFF">Jive</tspan><tspan fill="#A78BFA">DB</tspan>
+  </text>
+</svg>

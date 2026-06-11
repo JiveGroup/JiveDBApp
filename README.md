@@ -151,7 +151,7 @@ Repo kèm sẵn `docker-compose.yml` và bộ dữ liệu mẫu trong `db/` đ�
 
 > Yêu cầu: đã cài **Docker** và **Docker Compose** (lệnh `docker compose`).
 
-### 9.1. Khởi chạy
+### 10.1. Khởi chạy
 
 Từ thư mục gốc của repo:
 
@@ -164,21 +164,30 @@ Dữ liệu mẫu **tự nạp khi container khởi tạo lần đầu**:
 - **PostgreSQL / MySQL**: chạy các file `*.sql` trong `db/<bộ>/<db>/` qua `/docker-entrypoint-initdb.d`.
 - **Redis**: service `redis-seed` nạp `db/<bộ>/redis/seed.redis` ngay sau khi Redis sẵn sàng rồi tự thoát.
 
-### 9.2. Thông tin kết nối (chỉ để test)
+### 10.2. Thông tin đăng nhập (chỉ để test)
 
-Tạo kết nối trong JiveDB với các thông số sau:
+Dùng các thông số dưới đây để **tạo kết nối trong JiveDB** tới dữ liệu mẫu vừa dựng. Đây là thông tin test cục bộ, **không dùng cho production**.
 
-| DB | Host | Port | User | Password | Database |
+| CSDL | Host | Port | User | Password | Database |
 |---|---|---|---|---|---|
 | PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` |
 | PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` |
 | MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` |
-| Redis 7 | `localhost` | `6379` | — | — | `db0` |
-| SQLite | — | — | — | — | mở file `db/seeds/sqlite/jdb.sqlite` |
+| Redis 7 | `localhost` | `6379` | — | — | `db0` (không mật khẩu) |
+| SQLite | — | — | — | — | mở trực tiếp file `.sqlite` (xem dưới) |
 
-> SQLite không cần Docker — chỉ cần dùng JiveDB mở trực tiếp file `.sqlite` trong `db/`.
+Ghi chú theo từng CSDL:
 
-### 9.3. Chọn bộ dữ liệu
+- **PostgreSQL** — có hai phiên bản chạy song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`.
+- **MySQL** — ngoài tài khoản `jdb` / `jdbtest`, còn có tài khoản quản trị **`root`** với mật khẩu `jdbtest` nếu cần.
+- **Redis** — không bật xác thực; dữ liệu mẫu nằm ở DB index `0`.
+- **SQLite** — không cần Docker, mở thẳng file bằng JiveDB:
+  - Bộ nhỏ: `db/seeds/sqlite/jdb.sqlite`
+  - Bộ tầm trung: `db/seeds-medium/sqlite/jdb_medium.sqlite`
+
+> Mẹo: với `make` (xem `Makefile`), bạn có thể mở nhanh shell vào DB — `make psql`, `make mysql`, `make redis-cli`.
+
+### 10.3. Chọn bộ dữ liệu
 
 Mặc định nạp bộ **nhỏ** (`seeds`). Đổi bộ qua biến môi trường `JDB_SEED`:
 
@@ -187,7 +196,7 @@ JDB_SEED=seeds        docker compose up -d   # bộ nhỏ (mặc định)
 JDB_SEED=seeds-medium docker compose up -d   # bộ tầm trung (nhiều bảng hơn)
 ```
 
-### 9.4. Nạp lại từ đầu
+### 10.4. Nạp lại từ đầu
 
 Script init **chỉ chạy khi volume còn trống**. Muốn xoá dữ liệu cũ và seed lại:
 
@@ -195,11 +204,35 @@ Script init **chỉ chạy khi volume còn trống**. Muốn xoá dữ liệu c�
 docker compose down -v && docker compose up -d
 ```
 
-### 9.5. Dừng và dọn dẹp
+### 10.5. Dừng và dọn dẹp
 
 ```bash
 docker compose down       # dừng, giữ lại dữ liệu trong volume
 docker compose down -v    # dừng và xoá luôn dữ liệu (volume)
+```
+
+### 10.6. Tạo đầy đủ Schema Objects cho PostgreSQL
+
+File `db/postgres_schema_objects_sample.sql` tạo **đầy đủ mỗi loại đối tượng schema** của PostgreSQL để bạn xem chúng hiển thị trong cây sidebar của JiveDB: **Tables, Views, Materialized Views, Foreign Tables, Sequences, Types** (enum/composite/range), **Domains, Collations, Functions, Procedures, Trigger Functions, Aggregates, Operators** và **Full-Text Search** (Parser → Template → Dictionary → Configuration).
+
+- **An toàn**: mọi thứ nằm trong schema riêng **`demo_objects`**, không đụng dữ liệu sẵn có. Đầu file đã `DROP SCHEMA ... CASCADE` nên **chạy lại nhiều lần được**.
+- **Yêu cầu**: PostgreSQL **14+**, cần **ICU** và **postgres_fdw** — các image `postgres:16`/`postgres:18` trong `docker-compose.yml` đã có sẵn, và tài khoản `jdb` là superuser nên tạo được EXTENSION / SERVER / FTS.
+
+Nạp file vào PostgreSQL đang chạy (Postgres 16, cổng 5432):
+
+```bash
+docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/postgres_schema_objects_sample.sql
+# hoặc nhanh hơn:
+make pg-objects
+```
+
+Hoặc mở file, **copy toàn bộ nội dung vào SQL Editor** của JiveDB rồi chạy (lưu ý: các khối hàm/thủ tục dùng dollar-quote `$$ ... $$` phải chạy cả khối, đừng cắt theo dấu `;` bên trong).
+
+Sau đó **Refresh sidebar** rồi mở schema `demo_objects` để xem toàn bộ đối tượng. Dọn sạch khi xong:
+
+```sql
+DROP SCHEMA demo_objects CASCADE;
+DROP SERVER  demo_remote  CASCADE;   -- server FDW là toàn cục, không thuộc schema
 ```
 
 > Chi tiết về lược đồ, số lượng bảng/dòng và câu truy vấn DEMO có sẵn trong `db/seeds/README.md` và các README ở từng thư mục con.

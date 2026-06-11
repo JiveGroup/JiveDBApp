@@ -1,8 +1,9 @@
 # Dữ liệu mẫu — bộ TẦM TRUNG
 
-Bộ dữ liệu tổng hợp cỡ vừa, **tách biệt hoàn toàn** với `db/seeds/` (bộ nhỏ mặc định). Dùng để thử nghiệm hiệu năng UI/duyệt nhiều bảng. Không được nối vào `docker-compose.yml` để tránh thay đổi bộ mẫu cũ.
+Bộ dữ liệu tổng hợp **lớn**, **tách biệt hoàn toàn** với `db/seeds/` (bộ nhỏ mặc định). Dùng để thử nghiệm hiệu năng UI / duyệt nhiều bảng và nhiều dòng. Dùng qua Docker bằng biến môi trường `JDB_SEED=seeds-medium` (xem `docker-compose.yml`).
 
 - **100 bảng** có quan hệ (FK) cho mỗi CSDL quan hệ, mỗi loại **2 file**: schema + data.
+- **~199k dòng/dialect** (≈ 800–3000 dòng mỗi bảng) → file SQLite ~14 MB, lớn hơn hẳn bộ nhỏ (~51k dòng).
 - **Redis ~5000 key** đa kiểu (string / hash / list / set / zset).
 - Sinh tất định (RNG có seed) → chạy lại cho kết quả giống nhau.
 

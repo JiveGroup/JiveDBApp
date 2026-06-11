@@ -1,0 +1,40 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JiveDB">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1020"/>
+      <stop offset="1" stop-color="#1B1240"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="146" y1="110" x2="366" y2="402" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.55">
+      <stop stop-color="#7C3AED" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Mark -->
+  <g transform="translate(468 96) scale(0.512)">
+    <path d="M161 165 V347 A95 34 0 0 0 351 347 V165 Z" fill="url(#mark)"/>
+    <ellipse cx="256" cy="165" rx="95" ry="34" fill="url(#mark)"/>
+    <g fill="none" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="6" stroke-linecap="round">
+      <path d="M161 226 A95 34 0 0 0 351 226"/>
+      <path d="M161 287 A95 34 0 0 0 351 287"/>
+    </g>
+    <path d="M372 82 C376 106 388 118 412 122 C388 126 376 138 372 162 C368 138 356 126 332 122 C356 118 368 106 372 82 Z" fill="#FBBF24"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="600" y="445" text-anchor="middle" font-family="Geist, Inter, 'Segoe UI', system-ui, sans-serif" font-size="104" font-weight="800" letter-spacing="-2">
+    <tspan fill="#FFFFFF">Jive</tspan><tspan fill="#A78BFA">DB</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <text x="600" y="498" text-anchor="middle" font-family="Geist, Inter, 'Segoe UI', system-ui, sans-serif" font-size="30" font-weight="500" fill="#C7CAD9">
+    One client for PostgreSQL · MySQL · SQLite · Redis
+  </text>
+</svg>

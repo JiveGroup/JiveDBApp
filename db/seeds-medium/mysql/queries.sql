@@ -14,7 +14,7 @@ SELECT count(*) AS total FROM core_user;
 SELECT * FROM core_user ORDER BY created_at DESC LIMIT 10;
 
 -- 5) Nhóm theo tháng (created_at)
-SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, count(*) AS rows FROM core_user GROUP BY month ORDER BY month DESC;
+SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, count(*) AS `rows` FROM core_user GROUP BY month ORDER BY month DESC;
 
 -- 6) Cột của một bảng
 SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'core_user' ORDER BY ordinal_position;

@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JiveDB mark">
+  <defs>
+    <linearGradient id="mark" x1="146" y1="110" x2="366" y2="402" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Scaled & centered so the mark fills its 512×512 box -->
+  <g transform="translate(-185.2 -100.5) scale(1.54)">
+    <!-- Database cylinder in brand gradient -->
+    <g>
+      <path d="M161 165 V347 A95 34 0 0 0 351 347 V165 Z" fill="url(#mark)"/>
+      <ellipse cx="256" cy="165" rx="95" ry="34" fill="url(#mark)"/>
+    </g>
+    <g fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round">
+      <path d="M161 226 A95 34 0 0 0 351 226"/>
+      <path d="M161 287 A95 34 0 0 0 351 287"/>
+    </g>
+
+    <!-- Spark accent -->
+    <path d="M372 82 C376 106 388 118 412 122 C388 126 376 138 372 162 C368 138 356 126 332 122 C356 118 368 106 372 82 Z" fill="#FBBF24"/>
+  </g>
+</svg>

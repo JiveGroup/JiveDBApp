@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JiveDB">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Database cylinder -->
+  <g>
+    <path d="M161 165 V347 A95 34 0 0 0 351 347 V165 Z" fill="#FFFFFF"/>
+    <ellipse cx="256" cy="165" rx="95" ry="34" fill="#FFFFFF"/>
+  </g>
+
+  <!-- Cylinder bands -->
+  <g fill="none" stroke="#7C3AED" stroke-opacity="0.28" stroke-width="6" stroke-linecap="round">
+    <path d="M161 226 A95 34 0 0 0 351 226"/>
+    <path d="M161 287 A95 34 0 0 0 351 287"/>
+  </g>
+
+  <!-- Spark accent (Jive) -->
+  <path d="M372 82 C376 106 388 118 412 122 C388 126 376 138 372 162 C368 138 356 126 332 122 C356 118 368 106 372 82 Z" fill="#FBBF24"/>
+</svg>
