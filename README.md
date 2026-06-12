@@ -1,120 +1,120 @@
-# JiveDB — Công cụ quản lý cơ sở dữ liệu gọn nhẹ, hiện đại
+# JiveDB — a lightweight, modern database management tool
 
-> Một ứng dụng desktop để **kết nối, truy vấn, chỉnh sửa và phân tích** dữ liệu của bạn trên nhiều loại cơ sở dữ liệu — nhanh, an toàn và dễ chịu khi sử dụng hằng ngày.
-
----
-
-## 1. JiveDB là gì?
-
-JiveDB (JiveDB) là một ứng dụng desktop **native** giúp bạn làm việc với cơ sở dữ liệu mà không cần nhiều công cụ rời rạc. Toàn bộ ứng dụng được đóng gói thành **một file chạy duy nhất**, khởi động nhanh và không yêu cầu cài đặt phức tạp.
-
-Điểm khác biệt của JiveDB nằm ở sự cân bằng: đủ mạnh cho công việc thực tế, nhưng vẫn **nhẹ, sạch và trực quan**. Bạn có thể mở một bảng, lọc dữ liệu, sửa vài dòng, xem sơ đồ quan hệ hay xuất file chỉ trong vài cú nhấp.
+> A desktop app to **connect, query, edit and analyze** your data across many database engines — fast, secure and pleasant for everyday use.
 
 ---
 
-## 2. Vì sao nên chọn JiveDB?
+## 1. What is JiveDB?
 
-- **Một công cụ cho nhiều loại cơ sở dữ liệu** — không phải chuyển qua lại giữa nhiều phần mềm.
-- **Lưới dữ liệu mạnh ngang bảng tính** — chọn vùng, lọc theo toán tử, sắp xếp nhiều cột, dán nhiều ô, định dạng có điều kiện và hơn thế nữa.
-- **Trình soạn SQL thông minh** — chạy đúng câu lệnh tại con trỏ, định dạng, lưu yêu thích, lịch sử truy vấn.
-- **Sơ đồ quan hệ (ERD)** trực quan, chỉ-xem an toàn, kèm xem nhanh DDL của từng bảng.
-- **Bảo mật ngay từ mặc định** — mật khẩu kết nối được mã hoá khi lưu trên máy.
-- **Nhẹ và nhanh** — một file chạy, giao diện gọn, hỗ trợ giao diện sáng/tối.
-- **Song ngữ** — hỗ trợ Tiếng Việt và English.
+JiveDB is a **native** desktop application that lets you work with databases without juggling a pile of separate tools. The whole app ships as **a single executable**, starts fast and needs no complicated setup.
+
+What sets JiveDB apart is balance: powerful enough for real work, yet still **light, clean and intuitive**. You can open a table, filter data, edit a few rows, view the relationship diagram or export a file in just a few clicks.
 
 ---
 
-## 3. Hỗ trợ cơ sở dữ liệu
+## 2. Why choose JiveDB?
 
-JiveDB làm việc với các hệ phổ biến trong cùng một giao diện thống nhất:
+- **One tool for many databases** — no more switching back and forth between different programs.
+- **A data grid as powerful as a spreadsheet** — range selection, operator-based filtering, multi-column sorting, multi-cell paste, conditional formatting and more.
+- **A smart SQL editor** — run exactly the statement at the cursor, format, save favorites, query history.
+- **Entity-Relationship Diagram (ERD)** that is visual, safely read-only, with quick DDL preview for each table.
+- **Secure by default** — connection passwords are encrypted when stored on your machine.
+- **Light and fast** — a single executable, a compact UI, light/dark theme support.
+- **Bilingual** — supports Vietnamese and English.
 
-| Cơ sở dữ liệu | Ghi chú |
+---
+
+## 3. Supported databases
+
+JiveDB works with popular engines in one unified interface:
+
+| Database | Notes |
 |---|---|
-| **PostgreSQL** | Nhiều schema, chuyển schema nhanh, xem định nghĩa đối tượng (DDL). |
-| **MySQL** | Quản lý bảng/view/chỉ mục/thủ tục theo từng database. |
-| **SQLite** | Mở file cục bộ, gọn nhẹ, không cần máy chủ. |
-| **Redis** | Trình duyệt khoá/giá trị cho thao tác nhanh. |
+| **PostgreSQL** | Multiple schemas, fast schema switching, view object definitions (DDL). |
+| **MySQL** | Manage tables/views/indexes/procedures per database. |
+| **SQLite** | Open local files, lightweight, no server required. |
+| **Redis** | Key/value browser for quick operations. |
 
 ---
 
-## 4. Các tính năng nổi bật
+## 4. Highlight features
 
-### 4.1. Lưới dữ liệu (DataGrid) — điểm sáng của JiveDB
+### 4.1. The Data Grid — JiveDB's standout
 
-Đây là nơi bạn dành nhiều thời gian nhất, và JiveDB đầu tư mạnh để nó thật sự tiện:
+This is where you spend most of your time, and JiveDB invests heavily to make it genuinely convenient:
 
-- **Chọn vùng ô** như Excel, kèm thanh tổng hợp nhanh (đếm, tổng, trung bình, nhỏ nhất, lớn nhất).
-- **Sao chép linh hoạt**: ô, dòng, vùng chọn hoặc cả cột dưới nhiều định dạng (TSV, CSV, JSON, INSERT, UPDATE).
-- **Lọc theo toán tử** cho từng cột: `= ≠ > < ≥ ≤`, chứa (LIKE), rỗng/khác rỗng, và **IN / NOT IN**, kèm chú thích ký hiệu dễ hiểu.
-- **Sắp xếp nhiều cột** theo thứ tự ưu tiên; **đóng băng (ghim) cột** để theo dõi khi cuộn ngang.
-- **Chỉnh sửa trực tiếp** an toàn: theo dõi thay đổi, xem trước rồi mới lưu; **hoàn tác từng ô**; dán nhiều ô, điền xuống, đặt NULL hàng loạt.
-- **Phân tích nhanh**: thống kê cột và phân bố giá trị phổ biến ngay trong lưới.
-- **Tìm & Thay thế**, **định dạng có điều kiện** (tô màu theo quy tắc), **tự vừa độ rộng cột**, **độ cao dòng** linh hoạt.
-- **Nhập CSV** và **xuất Excel (.xlsx)**, CSV, JSON — cho cả toàn bộ hoặc chỉ vùng chọn.
-- **Điều hướng theo khoá ngoại**: nhảy tới dòng được tham chiếu chỉ với một cú nhấp.
+- **Cell range selection** like Excel, with a quick summary bar (count, sum, average, min, max).
+- **Flexible copy**: cell, row, selection or a whole column, in multiple formats (TSV, CSV, JSON, INSERT, UPDATE).
+- **Operator-based filtering** per column: `= ≠ > < ≥ ≤`, contains (LIKE), empty/not empty, and **IN / NOT IN**, with easy-to-read symbol hints.
+- **Multi-column sorting** by priority order; **freeze (pin) columns** to keep them in view while scrolling horizontally.
+- **Safe in-place editing**: change tracking, preview before saving; **per-cell undo**; multi-cell paste, fill down, bulk set NULL.
+- **Quick analysis**: column statistics and common value distribution right inside the grid.
+- **Find & Replace**, **conditional formatting** (color by rules), **auto-fit column width**, flexible **row height**.
+- **CSV import** and **Excel (.xlsx) export**, CSV, JSON — for the whole table or just the selection.
+- **Foreign-key navigation**: jump to the referenced row with a single click.
 
-### 4.2. Trình soạn thảo SQL
+### 4.2. SQL Editor
 
-- **Chạy thông minh**: chỉ cần đặt con trỏ trong một câu lệnh và chạy — JiveDB tự nhận đúng câu cần thực thi.
-- Hỗ trợ **nhiều câu lệnh**, **định dạng (format)**, tô màu cú pháp, gợi ý.
-- **Lịch sử truy vấn** và **câu lệnh yêu thích** để dùng lại nhanh.
-- Với PostgreSQL: **chọn schema** ngay trên thanh công cụ và truy vấn theo schema đang chọn.
+- **Smart run**: just place the cursor inside a statement and run — JiveDB picks the right statement to execute.
+- Supports **multiple statements**, **formatting**, syntax highlighting, suggestions.
+- **Query history** and **favorite statements** for quick reuse.
+- For PostgreSQL: **pick a schema** right on the toolbar and query against the selected schema.
 
-### 4.3. Sơ đồ quan hệ (ERD)
+### 4.3. Entity-Relationship Diagram (ERD)
 
-- Tự dựng sơ đồ **chỉ gồm các bảng** và quan hệ khoá ngoại giữa chúng.
-- **Chỉ-xem an toàn**: không có thao tác làm thay đổi cơ sở dữ liệu.
-- **Double-click** một bảng để mở rộng vừa đủ, hiển thị đầy đủ tên cột dài.
-- Bật **panel Info** để xem nhanh **DDL** của bảng được chọn và sao chép chỉ với một nút.
-- Màu sắc **đồng bộ với giao diện sáng/tối** của ứng dụng.
+- Automatically builds a diagram **of tables only** and the foreign-key relationships between them.
+- **Safely read-only**: no operations that modify the database.
+- **Double-click** a table to expand it just enough to show long column names in full.
+- Toggle the **Info panel** to quickly view the **DDL** of the selected table and copy it with one button.
+- Colors **stay in sync with the app's light/dark theme**.
 
-### 4.4. Khám phá cấu trúc & thông tin
+### 4.4. Explore structure & information
 
-- Cây đối tượng đầy đủ: bảng, view, chỉ mục, hàm/thủ tục, sequence, kiểu dữ liệu…
-- **Xem định nghĩa (DDL)** của đối tượng dưới dạng chỉ-đọc, có tô màu cú pháp.
-- Tab **Info** tổng hợp metadata theo nhóm (Tables, Views, Indexes, Procedures) để nắm nhanh toàn cảnh.
-
----
-
-## 5. Bảo mật và quyền riêng tư
-
-- **Mã hoá khi lưu**: thông tin nhạy cảm của kết nối được mã hoá trước khi ghi xuống máy của bạn.
-- **Dữ liệu nằm trên máy bạn**: JiveDB là ứng dụng desktop, không bắt buộc gửi dữ liệu lên dịch vụ bên ngoài để hoạt động.
-- **An toàn theo mặc định**: các thao tác có thể gây mất dữ liệu đều được xác nhận rõ ràng; nhiều màn hình ưu tiên chế độ **chỉ-xem** khi không cần chỉnh sửa.
+- A full object tree: tables, views, indexes, functions/procedures, sequences, data types…
+- **View the definition (DDL)** of an object in read-only mode, with syntax highlighting.
+- The **Info** tab aggregates metadata by group (Tables, Views, Indexes, Procedures) for a quick overview.
 
 ---
 
-## 6. Đa nền tảng và hiệu năng
+## 5. Security and privacy
 
-- Đóng gói thành **một file chạy duy nhất**, khởi động nhanh.
-- Giao diện **gọn, hiện đại**, hỗ trợ **giao diện sáng/tối** và tông màu nhấn.
-- Lưới dữ liệu được **ảo hoá** để xử lý mượt mà với lượng dòng lớn.
-
----
-
-## 7. Phù hợp với ai?
-
-- **Lập trình viên** cần một công cụ nhanh để truy vấn và sửa dữ liệu khi phát triển.
-- **Người làm dữ liệu / phân tích** muốn lọc, tổng hợp và xuất dữ liệu mà không phải viết nhiều SQL.
-- **Quản trị viên cơ sở dữ liệu** cần xem cấu trúc, quan hệ và định nghĩa đối tượng một cách trực quan.
-- Bất kỳ ai muốn **một công cụ duy nhất, nhẹ nhàng** thay cho nhiều phần mềm rời rạc.
+- **Encrypted at rest**: sensitive connection details are encrypted before being written to your machine.
+- **Your data stays on your machine**: JiveDB is a desktop app and does not require sending your data to any external service to work.
+- **Safe by default**: potentially destructive operations are clearly confirmed; many screens prefer **read-only** mode when no editing is needed.
 
 ---
 
-## 8. Bắt đầu nhanh
+## 6. Cross-platform and performance
 
-1. Mở JiveDB và **tạo một kết nối** tới PostgreSQL, MySQL, SQLite hoặc Redis.
-2. Duyệt cây đối tượng ở thanh bên, **mở một bảng** để xem dữ liệu.
-3. Dùng **lưới dữ liệu** để lọc, sắp xếp, chỉnh sửa hoặc xuất file.
-4. Mở **SQL Editor** để chạy truy vấn, hoặc xem **ERD** để hiểu quan hệ giữa các bảng.
+- Packaged as **a single executable**, starts fast.
+- A **compact, modern** UI with **light/dark theme** and accent-color support.
+- The data grid is **virtualized** to stay smooth with large row counts.
 
 ---
 
-## 9. Tải về và cài đặt
+## 7. Who is it for?
 
-Lấy bản dựng mới nhất cho nền tảng của bạn từ trang **[Releases](../../releases/latest)**.
+- **Developers** who need a fast tool to query and edit data while building.
+- **Data / analytics people** who want to filter, aggregate and export data without writing much SQL.
+- **Database administrators** who need to view structure, relationships and object definitions visually.
+- Anyone who wants **a single, lightweight tool** instead of many separate programs.
 
-| Nền tảng | File |
+---
+
+## 8. Quick start
+
+1. Open JiveDB and **create a connection** to PostgreSQL, MySQL, SQLite or Redis.
+2. Browse the object tree in the sidebar, **open a table** to view its data.
+3. Use the **data grid** to filter, sort, edit or export.
+4. Open the **SQL Editor** to run queries, or view the **ERD** to understand the relationships between tables.
+
+---
+
+## 9. Download and install
+
+Get the latest build for your platform from the **[Releases](../../releases/latest)** page.
+
+| Platform | File |
 |---|---|
 | macOS (Intel & Apple Silicon) | `JiveDB.dmg` |
 | Windows x64 | `JiveDB-windows-amd64.exe` |
@@ -122,121 +122,150 @@ Lấy bản dựng mới nhất cho nền tảng của bạn từ trang **[Relea
 | Linux x64 | `JiveDB-linux-amd64.tar.gz` |
 | Linux ARM64 | `JiveDB-linux-arm64.tar.gz` |
 
-**macOS** — mở `JiveDB.dmg`, kéo **JiveDB** vào thư mục **Applications** rồi khởi chạy. (Đã ký Developer ID + notarized.)
+**macOS** — open `JiveDB.dmg`, drag **JiveDB** into the **Applications** folder, then launch it. (Developer ID signed + notarized.)
 
-**Windows** — chạy `JiveDB-windows-amd64.exe` (hoặc bản `-arm64`). Nếu hiện cảnh báo SmartScreen, bấm **More info → Run anyway** (bản dựng hiện chưa code‑signed).
+**Windows** — run `JiveDB-windows-amd64.exe` (or the `-arm64` build). If a SmartScreen warning appears, click **More info → Run anyway** (the current build is not yet code-signed).
 
-> **Yêu cầu WebView2 Runtime.** JiveDB dùng **Microsoft Edge WebView2** để hiển thị giao diện. Windows 11 (và đa số Windows 10 đã cập nhật) có sẵn runtime này. Nếu ứng dụng không mở được hoặc hiện màn hình trắng, hãy tải và cài **Evergreen WebView2 Runtime** (miễn phí) từ Microsoft:
+> **Requires the WebView2 Runtime.** JiveDB uses **Microsoft Edge WebView2** to render its UI. Windows 11 (and most updated Windows 10 machines) already include this runtime. If the app won't open or shows a blank screen, download and install the **Evergreen WebView2 Runtime** (free) from Microsoft:
 >
-> - Trang tải: https://developer.microsoft.com/en-us/microsoft-edge/webview2
-> - Chọn **Evergreen Bootstrapper** → tải về và chạy `MicrosoftEdgeWebview2Setup.exe`, làm theo hướng dẫn.
-> - Cài xong, khởi chạy lại JiveDB.
+> - Download page: https://developer.microsoft.com/en-us/microsoft-edge/webview2
+> - Choose the **Evergreen Bootstrapper** → download and run `MicrosoftEdgeWebview2Setup.exe`, then follow the prompts.
+> - Once installed, relaunch JiveDB.
 
-**Linux** — giải nén archive rồi chạy `install.sh` (thêm launcher kèm icon vào menu ứng dụng, không cần sudo):
+**Linux** — extract the archive and run `install.sh` (adds a launcher with icon to the app menu, no sudo needed):
 
 ```bash
 tar -xzf JiveDB-linux-amd64.tar.gz
 cd JiveDB-amd64 && ./install.sh
-# Cài runtime WebKitGTK nếu cần (Debian/Ubuntu):
+# Install the WebKitGTK runtime if needed (Debian/Ubuntu):
 # sudo apt install libwebkit2gtk-4.1-0 libgtk-3-0
 ```
 
-Sau đó mở **JiveDB** từ menu ứng dụng. (Gỡ cài đặt: `./uninstall.sh`.)
+Then open **JiveDB** from the app menu. (Uninstall: `./uninstall.sh`.)
 
 ---
 
-## 10. Tạo dữ liệu test với Docker
+## 10. Create test data with Docker
 
-Repo kèm sẵn `docker-compose.yml` và bộ dữ liệu mẫu trong `db/` để bạn dựng nhanh PostgreSQL, MySQL và Redis có dữ liệu — dùng để thử nghiệm JiveDB mà không cần tự cài máy chủ. Dữ liệu là **tổng hợp** (sinh tất định), không phải dữ liệu thật, và **chỉ dùng cho test cục bộ**.
+The repo ships with a `docker-compose.yml` and sample datasets under `db/` so you can quickly spin up PostgreSQL, MySQL and Redis with data — for trying out JiveDB without installing servers yourself. The data is **synthetic** (deterministically generated), not real data, and is **for local testing only**.
 
-> Yêu cầu: đã cài **Docker** và **Docker Compose** (lệnh `docker compose`).
+> Requirements: **Docker** and **Docker Compose** (the `docker compose` command) installed.
 
-### 10.1. Khởi chạy
+### 10.1. Start it up
 
-Từ thư mục gốc của repo:
+From the root of the repo:
 
 ```bash
 docker compose up -d
 ```
 
-Dữ liệu mẫu **tự nạp khi container khởi tạo lần đầu**:
+The sample data **loads automatically when the containers are first initialized**:
 
-- **PostgreSQL / MySQL**: chạy các file `*.sql` trong `db/<bộ>/<db>/` qua `/docker-entrypoint-initdb.d`.
-- **Redis**: service `redis-seed` nạp `db/<bộ>/redis/seed.redis` ngay sau khi Redis sẵn sàng rồi tự thoát.
+- **PostgreSQL / MySQL**: run the `*.sql` files in `db/<set>/<db>/` via `/docker-entrypoint-initdb.d`.
+- **Redis**: the `redis-seed` service loads `db/<set>/redis/seed.redis` right after Redis is ready, then exits.
 
-### 10.2. Thông tin đăng nhập (chỉ để test)
+### 10.2. Login credentials (for testing only)
 
-Dùng các thông số dưới đây để **tạo kết nối trong JiveDB** tới dữ liệu mẫu vừa dựng. Đây là thông tin test cục bộ, **không dùng cho production**.
+Use the settings below to **create a connection in JiveDB** to the sample data you just spun up. These are local test credentials, **not for production use**.
 
-| CSDL | Host | Port | User | Password | Database |
+| Database | Host | Port | User | Password | Database |
 |---|---|---|---|---|---|
 | PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` |
 | PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` |
 | MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` |
-| Redis 7 | `localhost` | `6379` | — | — | `db0` (không mật khẩu) |
-| SQLite | — | — | — | — | mở trực tiếp file `.sqlite` (xem dưới) |
+| Redis 7 | `localhost` | `6379` | — | — | `db0` (no password) |
+| SQLite | — | — | — | — | open the `.sqlite` file directly (see below) |
 
-Ghi chú theo từng CSDL:
+Per-database notes:
 
-- **PostgreSQL** — có hai phiên bản chạy song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`.
-- **MySQL** — ngoài tài khoản `jdb` / `jdbtest`, còn có tài khoản quản trị **`root`** với mật khẩu `jdbtest` nếu cần.
-- **Redis** — không bật xác thực; dữ liệu mẫu nằm ở DB index `0`.
-- **SQLite** — không cần Docker, mở thẳng file bằng JiveDB:
-  - Bộ nhỏ: `db/seeds/sqlite/jdb.sqlite`
-  - Bộ tầm trung: `db/seeds-medium/sqlite/jdb_medium.sqlite`
+- **PostgreSQL** — two versions run side by side: **16** on port `5432` and **18** on port `5433`, both with account `jdb` / `jdbtest` and database `jdb_dev`.
+- **MySQL** — besides the `jdb` / `jdbtest` account, there is also an admin **`root`** account with password `jdbtest` if needed.
+- **Redis** — authentication is disabled; the sample data lives in DB index `0`.
+- **SQLite** — no Docker needed, open the file directly in JiveDB:
+  - Small set: `db/seeds/sqlite/jdb.sqlite`
+  - Medium set: `db/seeds-medium/sqlite/jdb_medium.sqlite`
 
-> Mẹo: với `make` (xem `Makefile`), bạn có thể mở nhanh shell vào DB — `make psql`, `make mysql`, `make redis-cli`.
+> Tip: with `make` (see `Makefile`), you can quickly open a shell into a DB — `make psql`, `make mysql`, `make redis-cli`.
 
-### 10.3. Chọn bộ dữ liệu
+### 10.3. Choose a dataset
 
-Mặc định nạp bộ **nhỏ** (`seeds`). Đổi bộ qua biến môi trường `JDB_SEED`:
+By default the **small** set (`seeds`) is loaded. Switch sets via the `JDB_SEED` environment variable:
 
 ```bash
-JDB_SEED=seeds        docker compose up -d   # bộ nhỏ (mặc định)
-JDB_SEED=seeds-medium docker compose up -d   # bộ tầm trung (nhiều bảng hơn)
+JDB_SEED=seeds        docker compose up -d   # small set (default)
+JDB_SEED=seeds-medium docker compose up -d   # medium set (more tables)
 ```
 
-### 10.4. Nạp lại từ đầu
+### 10.4. Reload from scratch
 
-Script init **chỉ chạy khi volume còn trống**. Muốn xoá dữ liệu cũ và seed lại:
+The init scripts **only run while the volume is still empty**. To wipe the old data and re-seed:
 
 ```bash
 docker compose down -v && docker compose up -d
 ```
 
-### 10.5. Dừng và dọn dẹp
+### 10.5. Stop and clean up
 
 ```bash
-docker compose down       # dừng, giữ lại dữ liệu trong volume
-docker compose down -v    # dừng và xoá luôn dữ liệu (volume)
+docker compose down       # stop, keep the data in the volume
+docker compose down -v    # stop and delete the data (volume) too
 ```
 
-### 10.6. Tạo đầy đủ Schema Objects cho PostgreSQL
+### 10.6. Create the full set of PostgreSQL schema objects
 
-File `db/postgres_schema_objects_sample.sql` tạo **đầy đủ mỗi loại đối tượng schema** của PostgreSQL để bạn xem chúng hiển thị trong cây sidebar của JiveDB: **Tables, Views, Materialized Views, Foreign Tables, Sequences, Types** (enum/composite/range), **Domains, Collations, Functions, Procedures, Trigger Functions, Aggregates, Operators** và **Full-Text Search** (Parser → Template → Dictionary → Configuration).
+The `db/postgres_schema_objects_sample.sql` file creates **one of every kind of PostgreSQL schema object** so you can see how they appear in JiveDB's sidebar tree: **Tables, Views, Materialized Views, Foreign Tables, Sequences, Types** (enum/composite/range), **Domains, Collations, Functions, Procedures, Trigger Functions, Aggregates, Operators** and **Full-Text Search** (Parser → Template → Dictionary → Configuration).
 
-- **An toàn**: mọi thứ nằm trong schema riêng **`demo_objects`**, không đụng dữ liệu sẵn có. Đầu file đã `DROP SCHEMA ... CASCADE` nên **chạy lại nhiều lần được**.
-- **Yêu cầu**: PostgreSQL **14+**, cần **ICU** và **postgres_fdw** — các image `postgres:16`/`postgres:18` trong `docker-compose.yml` đã có sẵn, và tài khoản `jdb` là superuser nên tạo được EXTENSION / SERVER / FTS.
+- **Safe**: everything lives in a dedicated **`demo_objects`** schema and does not touch your existing data. The top of the file already does `DROP SCHEMA ... CASCADE`, so it is **safe to run repeatedly**.
+- **Requirements**: PostgreSQL **14+**, with **ICU** and **postgres_fdw** — the `postgres:16`/`postgres:18` images in `docker-compose.yml` already include these, and the `jdb` account is a superuser so it can create EXTENSION / SERVER / FTS objects.
 
-Nạp file vào PostgreSQL đang chạy (Postgres 16, cổng 5432):
+Load the file into the running PostgreSQL (Postgres 16, port 5432):
 
 ```bash
 docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/postgres_schema_objects_sample.sql
-# hoặc nhanh hơn:
+# or, more quickly:
 make pg-objects
 ```
 
-Hoặc mở file, **copy toàn bộ nội dung vào SQL Editor** của JiveDB rồi chạy (lưu ý: các khối hàm/thủ tục dùng dollar-quote `$$ ... $$` phải chạy cả khối, đừng cắt theo dấu `;` bên trong).
+Or open the file, **copy its entire contents into JiveDB's SQL Editor** and run it (note: the function/procedure blocks use dollar-quoting `$$ ... $$` and must be run as whole blocks — don't split on the inner `;`).
 
-Sau đó **Refresh sidebar** rồi mở schema `demo_objects` để xem toàn bộ đối tượng. Dọn sạch khi xong:
+Then **Refresh the sidebar** and open the `demo_objects` schema to see all the objects. Clean up when done:
 
 ```sql
 DROP SCHEMA demo_objects CASCADE;
-DROP SERVER  demo_remote  CASCADE;   -- server FDW là toàn cục, không thuộc schema
+DROP SERVER  demo_remote  CASCADE;   -- the FDW server is global, not part of a schema
 ```
 
-> Chi tiết về lược đồ, số lượng bảng/dòng và câu truy vấn DEMO có sẵn trong `db/seeds/README.md` và các README ở từng thư mục con.
+> Details about the schema, table/row counts and the DEMO queries are available in `db/seeds/README.md` and the READMEs in each subdirectory.
 
 ---
 
-> **JiveDB** — đủ mạnh cho công việc thực tế, đủ nhẹ để dùng mỗi ngày.
+## 11. Verify release files (checksum & size)
+
+After downloading the release artifacts (or when building a new version), you can verify their integrity and size with two `make` commands. By default they operate on `releases/<VERSION>` (where `VERSION` defaults to the current release); override with `VERSION=...` or `RELEASE_DIR=...`.
+
+**`make checksums`** — generates a SHA-256 hash for each file and writes them to `SHA256SUMS`:
+
+```bash
+make checksums                       # default version
+make checksums VERSION=1.3.0         # a specific version
+make checksums RELEASE_DIR=/path/to/dir
+```
+
+**`make verify-checksums`** — reads `SHA256SUMS` and prints `OK` for each file that matches:
+
+```bash
+make verify-checksums
+```
+
+**`make sizes`** — shows the human-readable size of each file:
+
+```bash
+make sizes
+make sizes VERSION=1.3.0
+```
+
+> Both commands skip the `SHA256SUMS` file itself.
+
+---
+
+> **JiveDB** — powerful enough for real work, light enough to use every day.

@@ -1,0 +1,21 @@
+# Kiểm soát nội dung source archive (.tar.gz/.zip) mà GitHub tự sinh ở mục
+# Releases và nút "Download ZIP" (chạy qua `git archive`).
+#
+# MỤC TIÊU: archive CHỈ chứa các file README, LICENSE và thư mục releases/.
+# `git archive` chỉ hỗ trợ loại trừ (export-ignore), không có "chỉ giữ", nên
+# ta loại trừ tất cả entry top-level còn lại. Khi thêm thư mục/file mới ở gốc
+# mà KHÔNG muốn đưa vào release, nhớ bổ sung một dòng export-ignore tương ứng.
+#
+# Các file vẫn nằm trong repo bình thường — chỉ không xuất hiện trong archive.
+
+# ── Loại khỏi archive ───────────────────────────────────────────────────────
+db/                     export-ignore
+docs/                   export-ignore
+docker-compose.yml      export-ignore
+Makefile                export-ignore
+.gitattributes          export-ignore
+.gitignore              export-ignore
+.DS_Store               export-ignore
+
+# ── GIỮ trong archive (tham chiếu, không cần khai báo): ─────────────────────
+#   README.md, README_vi.md, LICENSE, releases/
