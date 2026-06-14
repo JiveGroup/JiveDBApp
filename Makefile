@@ -15,6 +15,7 @@ COMPOSE := JDB_SEED=$(SEED) docker compose
 
 .PHONY: help up down reset restart logs ps \
         psql psql18 mysql redis-cli \
+        secure-gen psql-tls psql-mtls mysql-tls redis-tls-cli ssh-tunnel \
         seed-small seed-medium generate sqlite pg-objects clean
 
 help: ## Liệt kê các lệnh có sẵn
@@ -56,6 +57,30 @@ mysql: ## Mở mysql client vào MySQL 8 (port 3306)
 redis-cli: ## Mở redis-cli vào Redis 7 (port 6379)
 	docker exec -it jdbapp-redis-1 redis-cli
 
+## ── Kết nối bảo mật (TLS/SSL + SSH Tunnel) ───────────────────────────────────
+
+secure-gen: ## Sinh cert TLS + SSH key vào secure/ (chạy trước khi up)
+	./secure/gen.sh
+
+psql-tls: ## psql tới PostgreSQL TLS (host localhost:5434, verify-full qua CA test)
+	psql "host=localhost port=5434 user=jdb dbname=jdb_dev sslmode=verify-full sslrootcert=secure/tls/ca.crt"
+
+psql-mtls: ## psql tới PostgreSQL mTLS (host localhost:5435, BẮT BUỘC client cert)
+	psql "host=localhost port=5435 user=jdb dbname=jdb_dev sslmode=verify-full sslrootcert=secure/tls/ca.crt sslcert=secure/tls/client.crt sslkey=secure/tls/client.key"
+
+mysql-tls: ## mysql client tới MySQL TLS (host 127.0.0.1:3307, bắt buộc TLS)
+	mysql --protocol=TCP -h127.0.0.1 -P3307 -ujdb -pjdbtest \
+		--ssl-mode=VERIFY_CA --ssl-ca=secure/tls/ca.crt jdb_dev
+
+redis-tls-cli: ## redis-cli tới Redis TLS (host localhost:6380)
+	redis-cli --tls -h localhost -p 6380 --cacert secure/tls/ca.crt
+
+ssh-tunnel: ## Mở SSH tunnel localhost:55432 -> internal-postgres:5432 (qua bastion)
+	@echo "Tunnel: localhost:55432 -> internal-postgres:5432. Ctrl+C để đóng."
+	ssh -i secure/ssh/id_ed25519 -p 2222 -N \
+		-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+		-L 55432:internal-postgres:5432 jdb@localhost
+
 ## ── Dữ liệu mẫu ─────────────────────────────────────────────────────────────
 
 seed-small: ## Seed lại với bộ NHỎ (seeds)
@@ -75,3 +100,15 @@ pg-objects: ## Nạp đầy đủ schema objects mẫu vào PostgreSQL (schema d
 
 clean: ## Dừng stack và xoá toàn bộ volume (mất hết dữ liệu)
 	$(COMPOSE) down -v
+
+# Tạo database mới (thay đổi tên nếu cần)
+pg-new-db:
+	docker exec -it jdbapp-postgres-1 psql -U jdb -d jdb_dev -c "CREATE DATABASE ten_db_moi OWNER jdb;"
+	docker exec -i jdbapp-postgres-1 pg_restore -U jdb -d ten_db_moi < file.dump
+
+# Tạo database mới cho MySQL (thay đổi tên nếu cần)
+mysql-new-db:
+	docker exec -it jdbapp-mysql-1 mysql -uroot -pjdbtest -e \
+	    "CREATE DATABASE ten_db_moi CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; \
+     GRANT ALL PRIVILEGES ON ten_db_moi.* TO 'jdb'@'%'; FLUSH PRIVILEGES;"
+    docker exec -i jdbapp-mysql-1 mysql -ujdb -pjdbtest ten_db_moi  <  dump.sql

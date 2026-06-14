@@ -1,0 +1,6 @@
+.DS_Store
+
+# File bảo mật SINH RA cục bộ cho test kết nối an toàn — KHÔNG commit.
+# Tái tạo bằng: make secure-gen  (hoặc ./secure/gen.sh)
+secure/tls/
+secure/ssh/

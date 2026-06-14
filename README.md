@@ -237,6 +237,26 @@ DROP SERVER  demo_remote  CASCADE;   -- the FDW server is global, not part of a 
 
 > Details about the schema, table/row counts and the DEMO queries are available in `db/seeds/README.md` and the READMEs in each subdirectory.
 
+### 10.7. Test secure connections (TLS/SSL + SSH Tunnel)
+
+The stack also ships **security-enabled databases** for trying the **TLS/SSL** and **SSH Tunnel** tabs:
+
+```bash
+make secure-gen   # generate TLS CA/cert/key + SSH key into secure/ (run once)
+make up           # also brings up postgres-tls / mysql-tls / redis-tls / bastion
+```
+
+| Purpose | Host | Port | Notes |
+|---|---|---|---|
+| PostgreSQL TLS | `localhost` | `5434` | encryption required (plaintext rejected), client cert optional, CA = `secure/tls/ca.crt` |
+| PostgreSQL mTLS | `localhost` | `5435` | client cert **required** (`client.crt`+`client.key`) |
+| MySQL TLS | `127.0.0.1` | `3307` | TLS required (plaintext connections rejected) |
+| Redis TLS | `localhost` | `6380` | — |
+| SSH bastion | `localhost` | `2222` | user `jdb`, password `jdbtest` or key `secure/ssh/id_ed25519` |
+| Internal DB via tunnel | `internal-postgres` | `5432` | only reachable after SSH into the bastion |
+
+> Full parameter table for the app's connection dialog: see **`secure/README.md`**.
+
 ---
 
 ## 11. Verify release files (checksum & size)

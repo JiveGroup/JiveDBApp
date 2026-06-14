@@ -11,6 +11,7 @@
 # ── Loại khỏi archive ───────────────────────────────────────────────────────
 db/                     export-ignore
 docs/                   export-ignore
+secure/                 export-ignore
 docker-compose.yml      export-ignore
 Makefile                export-ignore
 .gitattributes          export-ignore

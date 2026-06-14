@@ -64,3 +64,132 @@ services:
     command: >
       sh -c "until redis-cli -h redis ping >/dev/null 2>&1; do sleep 1; done;
              redis-cli -h redis < /seed/seed.redis && echo 'redis seeded'"
+
+  # ════════════════════════════════════════════════════════════════════════
+  # KẾT NỐI BẢO MẬT (TLS/SSL) — phục vụ test tab "TLS/SSL" của ứng dụng.
+  # File cert/key sinh bằng: ./secure/gen.sh  (xem secure/README.md).
+  # Server bật TLS bằng CA test riêng → dùng được cả 4 mode:
+  #   require / verify-ca / verify-full, và mTLS (client.crt + client.key).
+  # ════════════════════════════════════════════════════════════════════════
+
+  # PostgreSQL bật SSL + BẮT BUỘC mã hoá. Host: localhost:5434
+  # pg_hba dùng hostssl + hostnossl reject → kết nối sslmode=disable bị TỪ CHỐI;
+  # require/verify-ca/verify-full vẫn chạy. Client cert TUỲ CHỌN (mTLS là 5435).
+  # sslrootcert = secure/tls/ca.crt (chỉ cần khi client chọn verify-ca/verify-full).
+  postgres-tls:
+    image: postgres:16
+    user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
+    environment:
+      POSTGRES_USER: jdb
+      POSTGRES_PASSWORD: jdbtest
+      POSTGRES_DB: jdb_dev
+    ports:
+      - "5434:5432"
+    entrypoint: ["bash", "/usr/local/bin/postgres-tls-entrypoint.sh"]
+    volumes:
+      - ./secure/postgres-tls-entrypoint.sh:/usr/local/bin/postgres-tls-entrypoint.sh:ro
+      - ./secure/postgres-tls-pg_hba.conf:/etc/postgres-tls/pg_hba.conf:ro
+      - ./secure/tls:/certs:ro
+      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+  # PostgreSQL bật SSL + BẮT BUỘC client cert (mTLS). Host: localhost:5435
+  # pg_hba dùng clientcert=verify-full → thiếu client.crt/client.key hợp lệ sẽ
+  # bị TỪ CHỐI dù mật khẩu đúng. Dùng để thấy rõ tác dụng của Client Auth.
+  postgres-mtls:
+    image: postgres:16
+    user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
+    environment:
+      POSTGRES_USER: jdb
+      POSTGRES_PASSWORD: jdbtest
+      POSTGRES_DB: jdb_dev
+    ports:
+      - "5435:5432"
+    entrypoint: ["bash", "/usr/local/bin/postgres-mtls-entrypoint.sh"]
+    volumes:
+      - ./secure/postgres-mtls-entrypoint.sh:/usr/local/bin/postgres-mtls-entrypoint.sh:ro
+      - ./secure/postgres-mtls-pg_hba.conf:/etc/postgres-mtls/pg_hba.conf:ro
+      - ./secure/tls:/certs:ro
+      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+  # MySQL bật SSL + bắt buộc TLS cho mọi kết nối TCP. Host: localhost:3307
+  # require_secure_transport=ON → kết nối KHÔNG có TLS tới cổng này sẽ bị từ chối
+  # (init qua unix socket được miễn nên dữ liệu mẫu vẫn nạp bình thường).
+  mysql-tls:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: jdbtest
+      MYSQL_DATABASE: jdb_dev
+      MYSQL_USER: jdb
+      MYSQL_PASSWORD: jdbtest
+    ports:
+      - "3307:3306"
+    command: >
+      --ssl-ca=/certs/ca.crt
+      --ssl-cert=/certs/mysql.crt
+      --ssl-key=/certs/mysql.key
+      --require-secure-transport=ON
+    volumes:
+      - ./secure/tls:/certs:ro
+      - ./db/${JDB_SEED:-seeds}/mysql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/${JDB_SEED:-seeds}/mysql/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+  # Redis bật TLS (tắt hẳn cổng plaintext). Host: localhost:6380
+  # tls-auth-clients no → cho test require/verify-ca không cần client cert;
+  # đổi thành "yes" nếu muốn bắt buộc mTLS.
+  redis-tls:
+    image: redis:7
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./secure/tls:/certs:ro
+    command: >
+      redis-server --port 0 --tls-port 6379
+      --tls-cert-file /certs/redis.crt
+      --tls-key-file /certs/redis.key
+      --tls-ca-cert-file /certs/ca.crt
+      --tls-auth-clients no
+
+  # One-shot: nạp dữ liệu mẫu vào redis-tls qua kết nối TLS rồi thoát.
+  redis-tls-seed:
+    image: redis:7
+    depends_on:
+      - redis-tls
+    volumes:
+      - ./db/${JDB_SEED:-seeds}/redis:/seed:ro
+      - ./secure/tls:/certs:ro
+    restart: "no"
+    command: >
+      sh -c "until redis-cli --tls --cacert /certs/ca.crt -h redis-tls -p 6379 ping >/dev/null 2>&1; do sleep 1; done;
+             redis-cli --tls --cacert /certs/ca.crt -h redis-tls -p 6379 < /seed/seed.redis && echo 'redis-tls seeded'"
+
+  # ════════════════════════════════════════════════════════════════════════
+  # SSH TUNNEL — phục vụ test tab "SSH Tunnel" của ứng dụng.
+  # internal-postgres KHÔNG mở cổng ra host; chỉ tới được qua bastion.
+  # Ứng dụng: SSH tới localhost:2222 (bastion) rồi tunnel sang
+  #           internal-postgres:5432.  Khoá: secure/ssh/id_ed25519
+  # ════════════════════════════════════════════════════════════════════════
+
+  # CSDL nội bộ — không có "ports:" nên host KHÔNG truy cập trực tiếp được.
+  internal-postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: jdb
+      POSTGRES_PASSWORD: jdbtest
+      POSTGRES_DB: jdb_dev
+    volumes:
+      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+  # Bastion SSH (image tự build, xem secure/bastion/). Đăng nhập bằng MẬT KHẨU
+  # (jdb/jdbtest) HOẶC PRIVATE KEY (secure/ssh/id_ed25519). AllowTcpForwarding
+  # bật sẵn để forward TCP tới internal-postgres trong network.
+  bastion:
+    build: ./secure/bastion
+    ports:
+      - "2222:2222"
+    depends_on:
+      - internal-postgres
+    volumes:
+      - ./secure/ssh/id_ed25519.pub:/etc/ssh/authorized_keys/jdb:ro

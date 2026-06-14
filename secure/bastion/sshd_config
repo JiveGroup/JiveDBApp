@@ -1,0 +1,21 @@
+# Cấu hình sshd cho bastion test. Tối giản, ưu tiên cho việc test tunnel.
+Port 2222
+
+# Xác thực: cho phép cả mật khẩu lẫn public key.
+PasswordAuthentication yes
+PubkeyAuthentication yes
+PermitRootLogin no
+
+# Public key của client mount vào /etc/ssh/authorized_keys/<user>.
+AuthorizedKeysFile /etc/ssh/authorized_keys/%u
+
+# Bật chuyển tiếp TCP để app mở đường ống tới CSDL nội bộ (single-hop).
+AllowTcpForwarding yes
+GatewayPorts no
+PermitTunnel no
+
+# Test cục bộ: bỏ kiểm quyền sở hữu file (key mount từ host có uid khác).
+StrictModes no
+UsePAM no
+
+Subsystem sftp internal-sftp

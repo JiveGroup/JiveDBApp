@@ -237,6 +237,26 @@ DROP SERVER  demo_remote  CASCADE;   -- server FDW là toàn cục, không thu�
 
 > Chi tiết về lược đồ, số lượng bảng/dòng và câu truy vấn DEMO có sẵn trong `db/seeds/README.md` và các README ở từng thư mục con.
 
+### 10.7. Test kết nối bảo mật (TLS/SSL + SSH Tunnel)
+
+Stack còn kèm các CSDL **bật bảo mật** để thử tab **TLS/SSL** và **SSH Tunnel**:
+
+```bash
+make secure-gen   # sinh CA/cert/key TLS + SSH key vào secure/ (chạy một lần)
+make up           # dựng thêm postgres-tls / mysql-tls / redis-tls / bastion
+```
+
+| Mục đích | Host | Cổng | Ghi chú |
+|---|---|---|---|
+| PostgreSQL TLS | `localhost` | `5434` | bắt buộc mã hoá (chặn plaintext), client cert tuỳ chọn, CA = `secure/tls/ca.crt` |
+| PostgreSQL mTLS | `localhost` | `5435` | **bắt buộc** client cert (`client.crt`+`client.key`) |
+| MySQL TLS | `127.0.0.1` | `3307` | bắt buộc TLS (chặn kết nối không mã hoá) |
+| Redis TLS | `localhost` | `6380` | — |
+| Bastion SSH | `localhost` | `2222` | user `jdb`, mật khẩu `jdbtest` hoặc key `secure/ssh/id_ed25519` |
+| CSDL nội bộ qua tunnel | `internal-postgres` | `5432` | chỉ tới được sau khi SSH vào bastion |
+
+> Bảng tham số đầy đủ để khai báo trong ứng dụng: xem **`secure/README.md`**.
+
 ---
 
 > **JiveDB** — đủ mạnh cho công việc thực tế, đủ nhẹ để dùng mỗi ngày.
