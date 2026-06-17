@@ -161,8 +161,8 @@ docker compose up -d
 
 The sample data **loads automatically when the containers are first initialized**:
 
-- **PostgreSQL / MySQL**: run the `*.sql` files in `db/<set>/<db>/` via `/docker-entrypoint-initdb.d`.
-- **Redis**: the `redis-seed` service loads `db/<set>/redis/seed.redis` right after Redis is ready, then exits.
+- **PostgreSQL / MySQL**: run the `*.sql` files in `db/seeds/<db>/` via `/docker-entrypoint-initdb.d`.
+- **Redis**: the `redis-seed` service loads `db/seeds/redis/seed.redis` right after Redis is ready, then exits.
 
 ### 10.2. Login credentials (for testing only)
 
@@ -172,29 +172,23 @@ Use the settings below to **create a connection in JiveDB** to the sample data y
 |---|---|---|---|---|---|
 | PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` |
 | PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` |
+| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 5 databases (×3 schemas) |
 | MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` |
 | Redis 7 | `localhost` | `6379` | — | — | `db0` (no password) |
 | SQLite | — | — | — | — | open the `.sqlite` file directly (see below) |
 
 Per-database notes:
 
-- **PostgreSQL** — two versions run side by side: **16** on port `5432` and **18** on port `5433`, both with account `jdb` / `jdbtest` and database `jdb_dev`.
+- **PostgreSQL** — two versions run side by side: **16** on port `5432` and **18** on port `5433`, both with account `jdb` / `jdbtest` and database `jdb_dev`. A third instance on port **`5436`** has **5 databases × 3 schemas** for testing multi-database navigation.
 - **MySQL** — besides the `jdb` / `jdbtest` account, there is also an admin **`root`** account with password `jdbtest` if needed.
 - **Redis** — authentication is disabled; the sample data lives in DB index `0`.
-- **SQLite** — no Docker needed, open the file directly in JiveDB:
-  - Small set: `db/seeds/sqlite/jdb.sqlite`
-  - Medium set: `db/seeds-medium/sqlite/jdb_medium.sqlite`
+- **SQLite** — no Docker needed, open the file directly in JiveDB: `db/seeds/sqlite/jdb.sqlite`
 
 > Tip: with `make` (see `Makefile`), you can quickly open a shell into a DB — `make psql`, `make mysql`, `make redis-cli`.
 
-### 10.3. Choose a dataset
+### 10.3. Sample data
 
-By default the **small** set (`seeds`) is loaded. Switch sets via the `JDB_SEED` environment variable:
-
-```bash
-JDB_SEED=seeds        docker compose up -d   # small set (default)
-JDB_SEED=seeds-medium docker compose up -d   # medium set (more tables)
-```
+The `seeds` dataset is loaded automatically on first start.
 
 ### 10.4. Reload from scratch
 
@@ -213,7 +207,7 @@ docker compose down -v    # stop and delete the data (volume) too
 
 ### 10.6. Create the full set of PostgreSQL schema objects
 
-The `db/postgres_schema_objects_sample.sql` file creates **one of every kind of PostgreSQL schema object** so you can see how they appear in JiveDB's sidebar tree: **Tables, Views, Materialized Views, Foreign Tables, Sequences, Types** (enum/composite/range), **Domains, Collations, Functions, Procedures, Trigger Functions, Aggregates, Operators** and **Full-Text Search** (Parser → Template → Dictionary → Configuration).
+The `db/sql/schema_object_postgres.sql` file creates **one of every kind of PostgreSQL schema object** so you can see how they appear in JiveDB's sidebar tree: **Tables, Views, Materialized Views, Foreign Tables, Sequences, Types** (enum/composite/range), **Domains, Collations, Functions, Procedures, Trigger Functions, Aggregates, Operators** and **Full-Text Search** (Parser → Template → Dictionary → Configuration).
 
 - **Safe**: everything lives in a dedicated **`demo_objects`** schema and does not touch your existing data. The top of the file already does `DROP SCHEMA ... CASCADE`, so it is **safe to run repeatedly**.
 - **Requirements**: PostgreSQL **14+**, with **ICU** and **postgres_fdw** — the `postgres:16`/`postgres:18` images in `docker-compose.yml` already include these, and the `jdb` account is a superuser so it can create EXTENSION / SERVER / FTS objects.
@@ -221,7 +215,7 @@ The `db/postgres_schema_objects_sample.sql` file creates **one of every kind of 
 Load the file into the running PostgreSQL (Postgres 16, port 5432):
 
 ```bash
-docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/postgres_schema_objects_sample.sql
+docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/sql/schema_object_postgres.sql
 # or, more quickly:
 make pg-objects
 ```

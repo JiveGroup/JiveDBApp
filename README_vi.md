@@ -161,8 +161,8 @@ docker compose up -d
 
 Dữ liệu mẫu **tự nạp khi container khởi tạo lần đầu**:
 
-- **PostgreSQL / MySQL**: chạy các file `*.sql` trong `db/<bộ>/<db>/` qua `/docker-entrypoint-initdb.d`.
-- **Redis**: service `redis-seed` nạp `db/<bộ>/redis/seed.redis` ngay sau khi Redis sẵn sàng rồi tự thoát.
+- **PostgreSQL / MySQL**: chạy các file `*.sql` trong `db/seeds/<db>/` qua `/docker-entrypoint-initdb.d`.
+- **Redis**: service `redis-seed` nạp `db/seeds/redis/seed.redis` ngay sau khi Redis sẵn sàng rồi tự thoát.
 
 ### 10.2. Thông tin đăng nhập (chỉ để test)
 
@@ -172,29 +172,23 @@ Dùng các thông số dưới đây để **tạo kết nối trong JiveDB** t�
 |---|---|---|---|---|---|
 | PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` |
 | PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` |
+| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 5 databases (×3 schemas) |
 | MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` |
 | Redis 7 | `localhost` | `6379` | — | — | `db0` (không mật khẩu) |
 | SQLite | — | — | — | — | mở trực tiếp file `.sqlite` (xem dưới) |
 
 Ghi chú theo từng CSDL:
 
-- **PostgreSQL** — có hai phiên bản chạy song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`.
+- **PostgreSQL** — có hai phiên bản chạy song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`. Một instance thứ ba ở cổng **`5436`** có **5 databases × 3 schemas** để test duyệt nhiều database.
 - **MySQL** — ngoài tài khoản `jdb` / `jdbtest`, còn có tài khoản quản trị **`root`** với mật khẩu `jdbtest` nếu cần.
 - **Redis** — không bật xác thực; dữ liệu mẫu nằm ở DB index `0`.
-- **SQLite** — không cần Docker, mở thẳng file bằng JiveDB:
-  - Bộ nhỏ: `db/seeds/sqlite/jdb.sqlite`
-  - Bộ tầm trung: `db/seeds-medium/sqlite/jdb_medium.sqlite`
+- **SQLite** — không cần Docker, mở thẳng file bằng JiveDB: `db/seeds/sqlite/jdb.sqlite`
 
 > Mẹo: với `make` (xem `Makefile`), bạn có thể mở nhanh shell vào DB — `make psql`, `make mysql`, `make redis-cli`.
 
-### 10.3. Chọn bộ dữ liệu
+### 10.3. Dữ liệu mẫu
 
-Mặc định nạp bộ **nhỏ** (`seeds`). Đổi bộ qua biến môi trường `JDB_SEED`:
-
-```bash
-JDB_SEED=seeds        docker compose up -d   # bộ nhỏ (mặc định)
-JDB_SEED=seeds-medium docker compose up -d   # bộ tầm trung (nhiều bảng hơn)
-```
+Bộ dữ liệu `seeds` được tự động nạp khi khởi tạo lần đầu.
 
 ### 10.4. Nạp lại từ đầu
 
@@ -213,7 +207,7 @@ docker compose down -v    # dừng và xoá luôn dữ liệu (volume)
 
 ### 10.6. Tạo đầy đủ Schema Objects cho PostgreSQL
 
-File `db/postgres_schema_objects_sample.sql` tạo **đầy đủ mỗi loại đối tượng schema** của PostgreSQL để bạn xem chúng hiển thị trong cây sidebar của JiveDB: **Tables, Views, Materialized Views, Foreign Tables, Sequences, Types** (enum/composite/range), **Domains, Collations, Functions, Procedures, Trigger Functions, Aggregates, Operators** và **Full-Text Search** (Parser → Template → Dictionary → Configuration).
+File `db/sql/schema_object_postgres.sql` tạo **đầy đủ mỗi loại đối tượng schema** của PostgreSQL để bạn xem chúng hiển thị trong cây sidebar của JiveDB: **Tables, Views, Materialized Views, Foreign Tables, Sequences, Types** (enum/composite/range), **Domains, Collations, Functions, Procedures, Trigger Functions, Aggregates, Operators** và **Full-Text Search** (Parser → Template → Dictionary → Configuration).
 
 - **An toàn**: mọi thứ nằm trong schema riêng **`demo_objects`**, không đụng dữ liệu sẵn có. Đầu file đã `DROP SCHEMA ... CASCADE` nên **chạy lại nhiều lần được**.
 - **Yêu cầu**: PostgreSQL **14+**, cần **ICU** và **postgres_fdw** — các image `postgres:16`/`postgres:18` trong `docker-compose.yml` đã có sẵn, và tài khoản `jdb` là superuser nên tạo được EXTENSION / SERVER / FTS.
@@ -221,7 +215,7 @@ File `db/postgres_schema_objects_sample.sql` tạo **đầy đủ mỗi loại �
 Nạp file vào PostgreSQL đang chạy (Postgres 16, cổng 5432):
 
 ```bash
-docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/postgres_schema_objects_sample.sql
+docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/sql/schema_object_postgres.sql
 # hoặc nhanh hơn:
 make pg-objects
 ```

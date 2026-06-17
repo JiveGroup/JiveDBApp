@@ -3,11 +3,8 @@
 #   docker compose up -d
 #
 # Dữ liệu mẫu tự nạp khi container khởi tạo LẦN ĐẦU:
-#   - PostgreSQL / MySQL: chạy *.sql trong db/<bộ>/<db>/ qua /docker-entrypoint-initdb.d
-#   - Redis: service "redis-seed" nạp db/<bộ>/redis/seed.redis sau khi redis sẵn sàng
-# Bộ dữ liệu MẶC ĐỊNH = seeds-medium (tầm trung). Đổi bộ qua biến JDB_SEED:
-#   JDB_SEED=seeds            docker compose up -d   # bộ nhỏ
-#   JDB_SEED=seeds-medium     docker compose up -d   # bộ tầm trung
+#   - PostgreSQL / MySQL: chạy *.sql trong db/seeds/<db>/ qua /docker-entrypoint-initdb.d
+#   - Redis: service "redis-seed" nạp db/seeds/redis/seed.redis sau khi redis sẵn sàng
 # Nạp lại từ đầu (xoá volume cũ):  docker compose down -v && docker compose up -d
 services:
   postgres:
@@ -19,8 +16,8 @@ services:
     ports:
       - "5432:5432"
     volumes: # mount riêng file init, KHÔNG mount cả thư mục (tránh chạy queries.sql lúc init)
-      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./db/seeds/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
 
   # Truy cập ở host qua cổng 5433. Nạp lại từ đầu: docker compose down -v && docker compose up -d
   postgres18:
@@ -32,8 +29,24 @@ services:
     ports:
       - "5433:5432"
     volumes: # mount riêng file init, KHÔNG mount cả thư mục (tránh chạy queries.sql lúc init)
-      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./db/seeds/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+  # PostgreSQL multi-database: 5 DBs × 3 schemas — test duyệt nhiều database.
+  # Host: localhost:5436.  User: jdb / Password: jdbtest
+  # Nạp lại từ đầu: docker compose down -v && docker compose up -d
+  postgres-multi:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: jdb
+      POSTGRES_PASSWORD: jdbtest
+      POSTGRES_DB: jdb_ecommerce
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./db/seeds/multidb-postgres/init.sh:/docker-entrypoint-initdb.d/00-init-multi.sh:ro
+      - ./db/seeds/multidb-postgres/databases:/seed/databases:ro
+      - ./db/seeds/multidb-postgres/data:/seed/data:ro
 
   mysql:
     image: mysql:8
@@ -45,8 +58,23 @@ services:
     ports:
       - "3306:3306"
     volumes: # mount riêng file init, KHÔNG mount cả thư mục (tránh chạy queries.sql lúc init)
-      - ./db/${JDB_SEED:-seeds}/mysql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./db/${JDB_SEED:-seeds}/mysql/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./db/seeds/mysql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/mysql/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+  # Một MySQL instance, một tài khoản `jdb`, 3 database khác lĩnh vực
+  # (jdb_ecommerce / jdb_healthcare / jdb_banking) — tương tự postgres-multi.
+  mysql-multi:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: jdbtest
+      MYSQL_DATABASE: jdb_ecommerce
+      MYSQL_USER: jdb
+      MYSQL_PASSWORD: jdbtest
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./db/seeds/multidb-mysql/init.sh:/docker-entrypoint-initdb.d/00-init-multi.sh:ro
+      - ./db/seeds/multidb-mysql/databases:/seed/databases:ro
 
   redis:
     image: redis:7
@@ -59,7 +87,7 @@ services:
     depends_on:
       - redis
     volumes:
-      - ./db/${JDB_SEED:-seeds}/redis:/seed:ro
+      - ./db/seeds/redis:/seed:ro
     restart: "no"
     command: >
       sh -c "until redis-cli -h redis ping >/dev/null 2>&1; do sleep 1; done;
@@ -90,8 +118,8 @@ services:
       - ./secure/postgres-tls-entrypoint.sh:/usr/local/bin/postgres-tls-entrypoint.sh:ro
       - ./secure/postgres-tls-pg_hba.conf:/etc/postgres-tls/pg_hba.conf:ro
       - ./secure/tls:/certs:ro
-      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./db/seeds/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
 
   # PostgreSQL bật SSL + BẮT BUỘC client cert (mTLS). Host: localhost:5435
   # pg_hba dùng clientcert=verify-full → thiếu client.crt/client.key hợp lệ sẽ
@@ -110,8 +138,8 @@ services:
       - ./secure/postgres-mtls-entrypoint.sh:/usr/local/bin/postgres-mtls-entrypoint.sh:ro
       - ./secure/postgres-mtls-pg_hba.conf:/etc/postgres-mtls/pg_hba.conf:ro
       - ./secure/tls:/certs:ro
-      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./db/seeds/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
 
   # MySQL bật SSL + bắt buộc TLS cho mọi kết nối TCP. Host: localhost:3307
   # require_secure_transport=ON → kết nối KHÔNG có TLS tới cổng này sẽ bị từ chối
@@ -132,8 +160,8 @@ services:
       --require-secure-transport=ON
     volumes:
       - ./secure/tls:/certs:ro
-      - ./db/${JDB_SEED:-seeds}/mysql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./db/${JDB_SEED:-seeds}/mysql/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./db/seeds/mysql/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/mysql/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
 
   # Redis bật TLS (tắt hẳn cổng plaintext). Host: localhost:6380
   # tls-auth-clients no → cho test require/verify-ca không cần client cert;
@@ -157,7 +185,7 @@ services:
     depends_on:
       - redis-tls
     volumes:
-      - ./db/${JDB_SEED:-seeds}/redis:/seed:ro
+      - ./db/seeds/redis:/seed:ro
       - ./secure/tls:/certs:ro
     restart: "no"
     command: >
@@ -179,8 +207,8 @@ services:
       POSTGRES_PASSWORD: jdbtest
       POSTGRES_DB: jdb_dev
     volumes:
-      - ./db/${JDB_SEED:-seeds}/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
-      - ./db/${JDB_SEED:-seeds}/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+      - ./db/seeds/postgres/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/postgres/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
 
   # Bastion SSH (image tự build, xem secure/bastion/). Đăng nhập bằng MẬT KHẨU
   # (jdb/jdbtest) HOẶC PRIVATE KEY (secure/ssh/id_ed25519). AllowTcpForwarding

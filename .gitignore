@@ -4,3 +4,7 @@
 # Tái tạo bằng: make secure-gen  (hoặc ./secure/gen.sh)
 secure/tls/
 secure/ssh/
+
+# Dữ liệu multi-DB seed — file lớn sinh bởi generate.mjs.
+# Tái tạo bằng: make generate-multi
+db/seeds/multidb-postgres/data/

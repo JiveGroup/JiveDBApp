@@ -4,44 +4,40 @@
 #   make            # xem danh sách lệnh
 #   make up         # dựng PostgreSQL + MySQL + Redis, tự nạp dữ liệu mẫu
 #   make reset      # nạp lại từ đầu (xoá volume cũ rồi seed lại)
-#   make up SEED=seeds-medium   # dùng bộ dữ liệu tầm trung
-#
-# Bộ dữ liệu mặc định = seeds (nhỏ). Đổi qua biến SEED.
-
-SEED ?= seeds
-COMPOSE := JDB_SEED=$(SEED) docker compose
 
 .DEFAULT_GOAL := help
 
 .PHONY: help up down reset restart logs ps \
-        psql psql18 mysql redis-cli \
+        psql psql18 pg-multi pg-multi-ls pg-multi-schemas mysql mysql-multi mysql-multi-ls redis-cli \
         secure-gen psql-tls psql-mtls mysql-tls redis-tls-cli ssh-tunnel \
-        seed-small seed-medium generate sqlite pg-objects clean
+        generate sqlite pg-objects clean
 
 help: ## Liệt kê các lệnh có sẵn
-	@echo "Lệnh khả dụng (bộ seed hiện tại: SEED=$(SEED)):"
+	@echo "Lệnh khả dụng:"
 	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) \
 		| awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
 ## ── Docker stack ────────────────────────────────────────────────────────────
 
 up: ## Dựng stack ở chế độ nền, tự nạp dữ liệu mẫu (lần đầu)
-	$(COMPOSE) up -d
+	docker compose up -d
 
 down: ## Dừng stack, GIỮ dữ liệu trong volume
-	$(COMPOSE) down
+	docker compose down
 
-reset: ## Xoá volume rồi seed lại từ đầu
-	$(COMPOSE) down -v && $(COMPOSE) up -d
+clean: ## Dừng stack và xoá toàn bộ volume (mất hết dữ liệu)
+	docker compose down -v
+
+reset: down up ## Xoá volume rồi seed lại từ đầu
 
 restart: ## Khởi động lại các service (không xoá dữ liệu)
-	$(COMPOSE) restart
+	docker compose restart
 
 logs: ## Theo dõi log tất cả service (Ctrl+C để thoát)
-	$(COMPOSE) logs -f
+	docker compose logs -f
 
 ps: ## Xem trạng thái các container
-	$(COMPOSE) ps
+	docker compose ps
 
 ## ── Mở shell vào DB ─────────────────────────────────────────────────────────
 
@@ -51,8 +47,26 @@ psql: ## Mở psql vào PostgreSQL 16 (port 5432)
 psql18: ## Mở psql vào PostgreSQL 18 (port 5433)
 	docker exec -it jdbapp-postgres18-1 psql -U jdb -d jdb_dev
 
+pg-multi: ## Mở psql vào PostgreSQL multi-db (port 5436, jdb_ecommerce)
+	docker exec -it jdbapp-postgres-multi-1 psql -U jdb -d jdb_ecommerce
+
+pg-multi-ls: ## Liệt kê tất cả database trong instance multi-db
+	docker exec -it jdbapp-postgres-multi-1 psql -U jdb -d jdb_ecommerce -c "\l"
+
+pg-multi-schemas: ## Liệt kê schema trong mỗi database multi-db
+	@for db in jdb_ecommerce jdb_healthcare jdb_banking; do \
+	  echo "=== $$db ==="; \
+	  docker exec -it jdbapp-postgres-multi-1 psql -U jdb -d $$db -c "\dn"; \
+	done
+
 mysql: ## Mở mysql client vào MySQL 8 (port 3306)
 	docker exec -it jdbapp-mysql-1 mysql -ujdb -pjdbtest jdb_dev
+
+mysql-multi: ## Mở mysql client vào MySQL multi-db (port 3308, jdb_ecommerce)
+	docker exec -it jdbapp-mysql-multi-1 mysql -ujdb -pjdbtest jdb_ecommerce
+
+mysql-multi-ls: ## Liệt kê database mà tài khoản jdb thấy trong instance multi-db
+	docker exec -it jdbapp-mysql-multi-1 mysql -ujdb -pjdbtest -e "SHOW DATABASES;"
 
 redis-cli: ## Mở redis-cli vào Redis 7 (port 6379)
 	docker exec -it jdbapp-redis-1 redis-cli
@@ -83,32 +97,17 @@ ssh-tunnel: ## Mở SSH tunnel localhost:55432 -> internal-postgres:5432 (qua ba
 
 ## ── Dữ liệu mẫu ─────────────────────────────────────────────────────────────
 
-seed-small: ## Seed lại với bộ NHỎ (seeds)
-	$(MAKE) reset SEED=seeds
+generate: ## Sinh lại file SQL/Redis cho bộ seed (cần Node)
+	node db/seeds/generate.mjs
 
-seed-medium: ## Seed lại với bộ TẦM TRUNG (seeds-medium)
-	$(MAKE) reset SEED=seeds-medium
+generate-multi: ## Sinh dữ liệu multi-DB seed (~500MB compressed, cần Node)
+	node db/seeds/multidb-postgres/generate.mjs
 
-generate: ## Sinh lại file SQL/Redis cho bộ seed đang chọn (cần Node)
-	node db/$(SEED)/generate.mjs
+generate-multi-small: ## Sinh dữ liệu multi-DB seed 1% rows (~5MB, test nhanh)
+	node db/seeds/multidb-postgres/generate.mjs --scale 0.01
 
-sqlite: ## Dựng lại file SQLite mẫu cho bộ seed đang chọn
-	db/$(SEED)/sqlite/build.sh
+sqlite: ## Dựng lại file SQLite mẫu
+	db/seeds/sqlite/build.sh
 
 pg-objects: ## Nạp đầy đủ schema objects mẫu vào PostgreSQL (schema demo_objects)
-	docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/postgres_schema_objects_sample.sql
-
-clean: ## Dừng stack và xoá toàn bộ volume (mất hết dữ liệu)
-	$(COMPOSE) down -v
-
-# Tạo database mới (thay đổi tên nếu cần)
-pg-new-db:
-	docker exec -it jdbapp-postgres-1 psql -U jdb -d jdb_dev -c "CREATE DATABASE ten_db_moi OWNER jdb;"
-	docker exec -i jdbapp-postgres-1 pg_restore -U jdb -d ten_db_moi < file.dump
-
-# Tạo database mới cho MySQL (thay đổi tên nếu cần)
-mysql-new-db:
-	docker exec -it jdbapp-mysql-1 mysql -uroot -pjdbtest -e \
-	    "CREATE DATABASE ten_db_moi CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; \
-     GRANT ALL PRIVILEGES ON ten_db_moi.* TO 'jdb'@'%'; FLUSH PRIVILEGES;"
-    docker exec -i jdbapp-mysql-1 mysql -ujdb -pjdbtest ten_db_moi  <  dump.sql
+	docker exec -i jdbapp-postgres-1 psql -U jdb -d jdb_dev < db/sql/schema_object_postgres.sql
