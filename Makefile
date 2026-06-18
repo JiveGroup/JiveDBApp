@@ -7,7 +7,7 @@
 
 .DEFAULT_GOAL := help
 
-.PHONY: help up down reset restart logs ps \
+.PHONY: help up up-single up-secure up-ssh up-all down reset restart logs ps \
         psql psql18 pg-multi pg-multi-ls pg-multi-schemas mysql mysql-multi mysql-multi-ls redis-cli \
         secure-gen psql-tls psql-mtls mysql-tls redis-tls-cli ssh-tunnel \
         generate sqlite pg-objects clean
@@ -19,8 +19,20 @@ help: ## Liệt kê các lệnh có sẵn
 
 ## ── Docker stack ────────────────────────────────────────────────────────────
 
-up: ## Dựng stack ở chế độ nền, tự nạp dữ liệu mẫu (lần đầu)
+up: ## Dựng nhóm chính (postgres-multi, mysql-multi, redis, redis-seed)
 	docker compose up -d
+
+up-single: ## Thêm postgres, postgres18, mysql (profile single)
+	docker compose --profile single up -d
+
+up-secure: ## Thêm các service TLS/mTLS (profile secure)
+	docker compose --profile secure up -d
+
+up-ssh: ## Thêm bastion + internal-postgres (profile ssh)
+	docker compose --profile ssh up -d
+
+up-all: ## Dựng TẤT CẢ service (mọi profile)
+	docker compose --profile all up -d
 
 down: ## Dừng stack, GIỮ dữ liệu trong volume
 	docker compose down

@@ -159,6 +159,16 @@ From the root of the repo:
 docker compose up -d
 ```
 
+By default this only starts the **core group**: `postgres-multi` (multi-database PostgreSQL, port `5436`), `mysql-multi` (multi-database MySQL, port `3308`), `redis` and `redis-seed`. The other services are grouped under **Compose profiles** and only start when you ask for them:
+
+```bash
+docker compose --profile single up -d   # plain postgres (5432) + postgres18 (5433) + mysql (3306)
+docker compose --profile secure up -d   # TLS / mTLS databases (see §10.7)
+docker compose --profile ssh    up -d   # SSH bastion + internal-postgres
+docker compose --profile all    up -d   # everything at once
+docker compose up -d postgres-tls       # or start any single service by name
+```
+
 The sample data **loads automatically when the containers are first initialized**:
 
 - **PostgreSQL / MySQL**: run the `*.sql` files in `db/seeds/<db>/` via `/docker-entrypoint-initdb.d`.
@@ -170,21 +180,24 @@ Use the settings below to **create a connection in JiveDB** to the sample data y
 
 | Database | Host | Port | User | Password | Database |
 |---|---|---|---|---|---|
-| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` |
-| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` |
-| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 5 databases (×3 schemas) |
-| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` |
-| Redis 7 | `localhost` | `6379` | — | — | `db0` (no password) |
+| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 3 databases (×3 schemas) — *core, default* |
+| MySQL multi-db | `localhost` | `3308` | `jdb` | `jdbtest` | 3 databases — *core, default* |
+| Redis 7 | `localhost` | `6379` | — | — | `db0` (no password) — *core, default* |
+| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
+| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
+| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
 | SQLite | — | — | — | — | open the `.sqlite` file directly (see below) |
 
 Per-database notes:
 
-- **PostgreSQL** — two versions run side by side: **16** on port `5432` and **18** on port `5433`, both with account `jdb` / `jdbtest` and database `jdb_dev`. A third instance on port **`5436`** has **5 databases × 3 schemas** for testing multi-database navigation.
-- **MySQL** — besides the `jdb` / `jdbtest` account, there is also an admin **`root`** account with password `jdbtest` if needed.
+- **PostgreSQL multi-db** (core) — instance on port **`5436`** with **3 databases × 3 schemas** (e-commerce / healthcare / banking), for testing multi-database navigation.
+- **MySQL multi-db** (core) — instance on port **`3308`** where the single `jdb` account sees **3 databases** (`jdb_ecommerce` / `jdb_healthcare` / `jdb_banking`).
+- **PostgreSQL single** (profile `single`) — two versions side by side: **16** on port `5432` and **18** on port `5433`, both account `jdb` / `jdbtest`, database `jdb_dev`.
+- **MySQL single** (profile `single`) — port `3306`; besides `jdb` / `jdbtest` there is an admin **`root`** account with password `jdbtest` if needed.
 - **Redis** — authentication is disabled; the sample data lives in DB index `0`.
 - **SQLite** — no Docker needed, open the file directly in JiveDB: `db/seeds/sqlite/jdb.sqlite`
 
-> Tip: with `make` (see `Makefile`), you can quickly open a shell into a DB — `make psql`, `make mysql`, `make redis-cli`.
+> Tip: with `make` (see `Makefile`), you can quickly open a shell into a DB — `make pg-multi`, `make mysql-multi`, `make redis-cli` for the core group, or `make psql` / `make mysql` after `make up-single`.
 
 ### 10.3. Sample data
 
@@ -237,7 +250,8 @@ The stack also ships **security-enabled databases** for trying the **TLS/SSL** a
 
 ```bash
 make secure-gen   # generate TLS CA/cert/key + SSH key into secure/ (run once)
-make up           # also brings up postgres-tls / mysql-tls / redis-tls / bastion
+make up-secure    # bring up postgres-tls / mysql-tls / redis-tls (profile secure)
+make up-ssh       # bring up the SSH bastion + internal-postgres (profile ssh)
 ```
 
 | Purpose | Host | Port | Notes |

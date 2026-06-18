@@ -1,6 +1,16 @@
 # Hạ tầng CSDL phục vụ test thủ công backend (KHÔNG dùng cho production).
 # Thông tin đăng nhập dưới đây chỉ là giá trị test cục bộ.
-#   docker compose up -d
+#
+# MẶC ĐỊNH chỉ start nhóm chính (không gắn profile):
+#   postgres-multi, mysql-multi, redis, redis-seed
+#     docker compose up -d
+#
+# Các service khác gắn "profiles" → chỉ chạy khi BẬT profile hoặc gọi đích danh:
+#   docker compose --profile single up -d   # postgres, postgres18, mysql
+#   docker compose --profile secure up -d   # *-tls, *-mtls, redis-tls
+#   docker compose --profile ssh    up -d   # bastion + internal-postgres
+#   docker compose --profile all    up -d   # tất cả
+#   docker compose up -d postgres-tls       # gọi đích danh 1 service bất kỳ
 #
 # Dữ liệu mẫu tự nạp khi container khởi tạo LẦN ĐẦU:
 #   - PostgreSQL / MySQL: chạy *.sql trong db/seeds/<db>/ qua /docker-entrypoint-initdb.d
@@ -9,6 +19,7 @@
 services:
   postgres:
     image: postgres:16
+    profiles: ["single", "all"]
     environment:
       POSTGRES_USER: jdb # khớp owner trong dump (OWNER TO protct) để init không lỗi
       POSTGRES_PASSWORD: jdbtest
@@ -22,6 +33,7 @@ services:
   # Truy cập ở host qua cổng 5433. Nạp lại từ đầu: docker compose down -v && docker compose up -d
   postgres18:
     image: postgres:18
+    profiles: ["single", "all"]
     environment:
       POSTGRES_USER: jdb # khớp owner trong dump (OWNER TO protct) để init không lỗi
       POSTGRES_PASSWORD: jdbtest
@@ -50,6 +62,7 @@ services:
 
   mysql:
     image: mysql:8
+    profiles: ["single", "all"]
     environment:
       MYSQL_ROOT_PASSWORD: jdbtest
       MYSQL_DATABASE: jdb_dev
@@ -106,6 +119,7 @@ services:
   # sslrootcert = secure/tls/ca.crt (chỉ cần khi client chọn verify-ca/verify-full).
   postgres-tls:
     image: postgres:16
+    profiles: ["secure", "all"]
     user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
     environment:
       POSTGRES_USER: jdb
@@ -126,6 +140,7 @@ services:
   # bị TỪ CHỐI dù mật khẩu đúng. Dùng để thấy rõ tác dụng của Client Auth.
   postgres-mtls:
     image: postgres:16
+    profiles: ["secure", "all"]
     user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
     environment:
       POSTGRES_USER: jdb
@@ -146,6 +161,7 @@ services:
   # (init qua unix socket được miễn nên dữ liệu mẫu vẫn nạp bình thường).
   mysql-tls:
     image: mysql:8
+    profiles: ["secure", "all"]
     environment:
       MYSQL_ROOT_PASSWORD: jdbtest
       MYSQL_DATABASE: jdb_dev
@@ -168,6 +184,7 @@ services:
   # đổi thành "yes" nếu muốn bắt buộc mTLS.
   redis-tls:
     image: redis:7
+    profiles: ["secure", "all"]
     ports:
       - "6380:6379"
     volumes:
@@ -182,6 +199,7 @@ services:
   # One-shot: nạp dữ liệu mẫu vào redis-tls qua kết nối TLS rồi thoát.
   redis-tls-seed:
     image: redis:7
+    profiles: ["secure", "all"]
     depends_on:
       - redis-tls
     volumes:
@@ -202,6 +220,7 @@ services:
   # CSDL nội bộ — không có "ports:" nên host KHÔNG truy cập trực tiếp được.
   internal-postgres:
     image: postgres:16
+    profiles: ["ssh", "all"]
     environment:
       POSTGRES_USER: jdb
       POSTGRES_PASSWORD: jdbtest
@@ -215,6 +234,7 @@ services:
   # bật sẵn để forward TCP tới internal-postgres trong network.
   bastion:
     build: ./secure/bastion
+    profiles: ["ssh", "all"]
     ports:
       - "2222:2222"
     depends_on:

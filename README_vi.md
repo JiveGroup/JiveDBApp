@@ -159,6 +159,16 @@ Từ thư mục gốc của repo:
 docker compose up -d
 ```
 
+Mặc định lệnh này chỉ dựng **nhóm chính**: `postgres-multi` (PostgreSQL nhiều database, cổng `5436`), `mysql-multi` (MySQL nhiều database, cổng `3308`), `redis` và `redis-seed`. Các service còn lại được gom theo **Compose profile** và chỉ chạy khi bạn yêu cầu:
+
+```bash
+docker compose --profile single up -d   # postgres (5432) + postgres18 (5433) + mysql (3306)
+docker compose --profile secure up -d   # các CSDL TLS / mTLS (xem §10.7)
+docker compose --profile ssh    up -d   # SSH bastion + internal-postgres
+docker compose --profile all    up -d   # tất cả cùng lúc
+docker compose up -d postgres-tls       # hoặc gọi đích danh từng service
+```
+
 Dữ liệu mẫu **tự nạp khi container khởi tạo lần đầu**:
 
 - **PostgreSQL / MySQL**: chạy các file `*.sql` trong `db/seeds/<db>/` qua `/docker-entrypoint-initdb.d`.
@@ -170,21 +180,24 @@ Dùng các thông số dưới đây để **tạo kết nối trong JiveDB** t�
 
 | CSDL | Host | Port | User | Password | Database |
 |---|---|---|---|---|---|
-| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` |
-| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` |
-| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 5 databases (×3 schemas) |
-| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` |
-| Redis 7 | `localhost` | `6379` | — | — | `db0` (không mật khẩu) |
+| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 3 databases (×3 schemas) — *nhóm chính, mặc định* |
+| MySQL multi-db | `localhost` | `3308` | `jdb` | `jdbtest` | 3 databases — *nhóm chính, mặc định* |
+| Redis 7 | `localhost` | `6379` | — | — | `db0` (không mật khẩu) — *nhóm chính, mặc định* |
+| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
+| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
+| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
 | SQLite | — | — | — | — | mở trực tiếp file `.sqlite` (xem dưới) |
 
 Ghi chú theo từng CSDL:
 
-- **PostgreSQL** — có hai phiên bản chạy song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`. Một instance thứ ba ở cổng **`5436`** có **5 databases × 3 schemas** để test duyệt nhiều database.
-- **MySQL** — ngoài tài khoản `jdb` / `jdbtest`, còn có tài khoản quản trị **`root`** với mật khẩu `jdbtest` nếu cần.
+- **PostgreSQL multi-db** (nhóm chính) — instance ở cổng **`5436`** có **3 databases × 3 schemas** (e-commerce / healthcare / banking) để test duyệt nhiều database.
+- **MySQL multi-db** (nhóm chính) — instance ở cổng **`3308`**, một tài khoản `jdb` nhìn thấy **3 databases** (`jdb_ecommerce` / `jdb_healthcare` / `jdb_banking`).
+- **PostgreSQL single** (profile `single`) — hai phiên bản song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`.
+- **MySQL single** (profile `single`) — cổng `3306`; ngoài `jdb` / `jdbtest` còn có tài khoản quản trị **`root`** mật khẩu `jdbtest` nếu cần.
 - **Redis** — không bật xác thực; dữ liệu mẫu nằm ở DB index `0`.
 - **SQLite** — không cần Docker, mở thẳng file bằng JiveDB: `db/seeds/sqlite/jdb.sqlite`
 
-> Mẹo: với `make` (xem `Makefile`), bạn có thể mở nhanh shell vào DB — `make psql`, `make mysql`, `make redis-cli`.
+> Mẹo: với `make` (xem `Makefile`), bạn có thể mở nhanh shell vào DB — `make pg-multi`, `make mysql-multi`, `make redis-cli` cho nhóm chính, hoặc `make psql` / `make mysql` sau khi chạy `make up-single`.
 
 ### 10.3. Dữ liệu mẫu
 
@@ -237,7 +250,8 @@ Stack còn kèm các CSDL **bật bảo mật** để thử tab **TLS/SSL** và 
 
 ```bash
 make secure-gen   # sinh CA/cert/key TLS + SSH key vào secure/ (chạy một lần)
-make up           # dựng thêm postgres-tls / mysql-tls / redis-tls / bastion
+make up-secure    # dựng postgres-tls / mysql-tls / redis-tls (profile secure)
+make up-ssh       # dựng SSH bastion + internal-postgres (profile ssh)
 ```
 
 | Mục đích | Host | Cổng | Ghi chú |
