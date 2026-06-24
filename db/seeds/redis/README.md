@@ -6,11 +6,15 @@ Script dữ liệu mẫu cho Redis: **1000 key** đa kiểu. Dữ liệu tổng 
 
 ## 1. File
 
-- `seed.redis` — danh sách lệnh `redis-cli` (mỗi dòng một lệnh), bắt đầu bằng `FLUSHDB` nên nạp lại được nhiều lần.
+| File | Dùng cho | JSON format |
+|---|---|---|
+| `seed7.redis` | Redis 6/7 (plain, không module) | `SET key '{"...":"..."}'` — JSON lưu dạng string |
+| `seed8.redis` | Redis 8 (built-in JSON) | `JSON.SET key $ '{"...":"..."}'` — JSON native |
+| `queries.redis` | Demo queries cho cả hai phiên bản | |
 
 ---
 
-## 2. Có những kiểu gì (≈1000 key)
+## 2. Có những kiểu gì (≈1050 key)
 
 | Kiểu | Mẫu khoá | Số lượng |
 |---|---|---|
@@ -20,46 +24,46 @@ Script dữ liệu mẫu cho Redis: **1000 key** đa kiểu. Dữ liệu tổng 
 | list | `feed:user:*` | 80 |
 | set | `tags:product:*` | 60 |
 | sorted set | `leaderboard:wk*` | 10 |
+| **stream** | `events:user:*` (3), `notifications:orders` (1), `audit:login` (1) | 5 |
+| **json** | `product:*:meta` (20) — `SET` string (Redis 7) hoặc `JSON.SET` (Redis 8) | 20 |
 
 ---
 
 ## 3. Tự nạp qua Docker
 
-`docker-compose.yml` có service `redis-seed` chạy một lần: chờ Redis sẵn sàng rồi nạp `seed.redis`.
+`docker-compose.yml` tự chọn file đúng cho từng service:
+- `redis-seed` → `seed7.redis` (Redis 7 trên port 6379)
+- `redis8-seed` → `seed8.redis` (Redis 8 trên port 6381)
 
 ```bash
 docker compose up -d
-docker compose logs redis-seed     # xem "redis seeded"
+docker compose logs redis-seed redis8-seed
 ```
 
-Nạp lại (Redis không bền vững theo mặc định): chạy lại service seed:
-
-```bash
-docker compose run --rm redis-seed
-```
+Nạp lại: `docker compose run --rm redis-seed` hoặc `docker compose run --rm redis8-seed`.
 
 ---
 
 ## 4. Nạp thủ công
 
 ```bash
-redis-cli -h localhost -p 6379 < seed.redis
+redis-cli -h localhost -p 6379 < seed7.redis     # Redis 7
+redis-cli -h localhost -p 6381 < seed8.redis     # Redis 8
 ```
 
 ---
 
 ## 5. Kết nối từ JiveDB
 
-| Trường | Giá trị |
+| Phiên bản | Host / Port |
 |---|---|
-| Loại | Redis |
-| Host / Port | localhost / 6379 |
-| Password | (không) |
-| DB index | db0 |
+| Redis 7 | localhost / 6379 |
+| Redis 8 | localhost / 6381 |
+
+Password: (không) · DB index: db0
 
 ---
 
 ## 6. Ghi chú
 
 - File không chứa dòng chú thích vì `redis-cli` xử lý từng dòng là một lệnh.
-- Sinh lại: `node db/seeds/generate.mjs`.

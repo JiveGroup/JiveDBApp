@@ -4,6 +4,7 @@
 #  Khoá mẫu: user:N, cart:N, order:N (hash) · feed:user:N (list)
 #            tags:product:N (set) · leaderboard:wkN (zset)
 #            product:N:views, rate:ip:N, session:tokN (string)
+#            product:N:meta (json) · events:user:N, notifications:orders, audit:login (stream)
 # ============================================================================
 
 # --- Tổng quan ---
@@ -54,6 +55,19 @@ EXPIRE demo:hello 120
 PERSIST demo:hello
 RENAME demo:hello demo:hi
 DEL demo:hi
+
+# --- JSON (lưu dạng string, format tự động trong JDB) ---
+TYPE product:1:meta
+GET product:1:meta
+GET product:5:meta
+GET product:12:meta
+
+# --- STREAM ---
+TYPE events:user:1
+XRANGE events:user:1 - +
+XINFO STREAM events:user:1
+XRANGE notifications:orders - +
+XREVRANGE audit:login + - COUNT 3
 
 # --- Server ---
 INFO server

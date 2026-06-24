@@ -1001,29 +1001,9 @@ ZADD leaderboard:wk09 2831 user:64 5846 user:65 193 user:66 2244 user:67 716 use
 ZADD leaderboard:wk10 6527 user:71 3105 user:72 2520 user:73 6455 user:74 5726 user:75 1787 user:76 4251 user:77 625 user:78 9842 user:79 1961 user:80 4248 user:81 5380 user:82 8572 user:83 6336 user:84 4526 user:85
 
 # ============================================================================
-# JSON (RedisJSON module required — TYPE returns "ReJSON-RL")
-# 20 product metadata documents
+# JSON — SET string (tương thích Redis 6/7 plain, JDB tự format JSON)
+# 20 product metadata
 # ============================================================================
-JSON.SET product:1:meta $ '{"id":1,"name":"Ergonomic Keyboard","price":89.99,"category":"Electronics","inStock":true,"tags":["office","ergonomic","wired"],"specs":{"weight":"1.2kg","color":"Black","warranty":"2 years"}}'
-JSON.SET product:2:meta $ '{"id":2,"name":"Wireless Mouse","price":45.50,"category":"Electronics","inStock":true,"tags":["wireless","ergonomic"],"specs":{"weight":"0.1kg","color":"Silver","battery":"AA"}}'
-JSON.SET product:3:meta $ '{"id":3,"name":"USB-C Hub","price":34.99,"category":"Electronics","inStock":false,"tags":["usb-c","adapter","laptop"],"specs":{"ports":7,"color":"Space Gray","weight":"0.08kg"}}'
-JSON.SET product:4:meta $ '{"id":4,"name":"Mechanical Keyboard","price":129.00,"category":"Electronics","inStock":true,"tags":["mechanical","rgb","gaming"],"specs":{"switch":"Cherry MX Blue","layout":"TKL","color":"Black"}}'
-JSON.SET product:5:meta $ '{"id":5,"name":"4K Monitor 27\"","price":449.99,"category":"Electronics","inStock":true,"tags":["4k","ips","27inch"],"specs":{"resolution":"3840x2160","refresh":"60Hz","ports":"HDMI,DP,USB-C"}}'
-JSON.SET product:6:meta $ '{"id":6,"name":"Standing Desk","price":599.00,"category":"Furniture","inStock":true,"tags":["adjustable","office","electric"],"specs":{"material":"Bamboo","height":"70-120cm","load":"80kg"}}'
-JSON.SET product:7:meta $ '{"id":7,"name":"Office Chair","price":349.00,"category":"Furniture","inStock":true,"tags":["ergonomic","mesh","adjustable"],"specs":{"material":"Mesh","color":"Gray","warranty":"5 years"}}'
-JSON.SET product:8:meta $ '{"id":8,"name":"Webcam 1080p","price":79.99,"category":"Electronics","inStock":false,"tags":["webcam","streaming","usb"],"specs":{"resolution":"1920x1080","fps":60,"mic":"Built-in"}}'
-JSON.SET product:9:meta $ '{"id":9,"name":"Desk Lamp LED","price":29.99,"category":"Office","inStock":true,"tags":["led","adjustable","usb"],"specs":{"brightness":"10 levels","colorTemp":"3000K-6500K","power":"USB-C"}}'
-JSON.SET product:10:meta $ '{"id":10,"name":"Noise-Cancelling Headphones","price":199.00,"category":"Audio","inStock":true,"tags":["anc","bluetooth","wireless"],"specs":{"battery":"30h","driver":"40mm","weight":"0.25kg"}}'
-JSON.SET product:11:meta $ '{"id":11,"name":"Laptop Stand","price":49.99,"category":"Office","inStock":true,"tags":["aluminum","portable","adjustable"],"specs":{"material":"Aluminum","height":"5-30cm","foldable":true}}'
-JSON.SET product:12:meta $ '{"id":12,"name":"External SSD 1TB","price":109.00,"category":"Storage","inStock":true,"tags":["ssd","usb-c","portable"],"specs":{"capacity":"1TB","speed":"1050MB/s","weight":"0.05kg"}}'
-JSON.SET product:13:meta $ '{"id":13,"name":"Smart Speaker","price":89.00,"category":"Audio","inStock":true,"tags":["smart","bluetooth","voice"],"specs":{"battery":"12h","driver":"52mm","waterproof":"IPX5"}}'
-JSON.SET product:14:meta $ '{"id":14,"name":"Wireless Charger","price":24.99,"category":"Accessories","inStock":true,"tags":["qi","fast-charge","pad"],"specs":{"wattage":"15W","compatible":"Qi","color":"White"}}'
-JSON.SET product:15:meta $ '{"id":15,"name":"Cable Management Kit","price":19.99,"category":"Office","inStock":true,"tags":["cable","organizer","desk"],"specs":{"pieces":12,"material":"Silicone","colors":"Black/White"}}'
-JSON.SET product:16:meta $ '{"id":16,"name":"Gaming Mouse Pad","price":34.99,"category":"Gaming","inStock":true,"tags":["rgb","extended","gaming"],"specs":{"size":"900x400mm","surface":"Micro-texture","rgb":true}}'
-JSON.SET product:17:meta $ '{"id":17,"name":"Monitor Arm","price":89.00,"category":"Office","inStock":true,"tags":["vivid","adjustable","gas-spring"],"specs":{"load":"2-9kg","vivid":"75/100","material":"Aluminum"}}'
-JSON.SET product:18:meta $ '{"id":18,"name":"Microphone USB","price":69.99,"category":"Audio","inStock":true,"tags":["condenser","streaming","usb"],"specs":{"pattern":"Cardioid","sampleRate":"24bit/96kHz","mount":"Shock mount"}}'
-JSON.SET product:19:meta $ '{"id":19,"name":"Docking Station","price":159.00,"category":"Electronics","inStock":false,"tags":["thunderbolt","dual-monitor","laptop"],"specs":{"ports":"12-in-1","powerDelivery":"100W","ethernet":"1Gbps"}}'
-JSON.SET product:20:meta $ '{"id":20,"name":"Pen Display Tablet","price":299.00,"category":"Creative","inStock":true,"tags":["drawing","display","stylus"],"specs":{"size":"13.3\"","resolution":"1920x1080","pen":"8192 levels"}}'
 
 # Redis 6 and 7.
 SET product:1:meta '{"id":1,"name":"Ergonomic Keyboard","price":89.99,"category":"Electronics","inStock":true,"tags":["office","ergonomic","wired"],"specs":{"weight":"1.2kg","color":"Black","warranty":"2 years"}}'

@@ -19,7 +19,6 @@
 services:
   postgres:
     image: postgres:16
-    profiles: ["single", "all"]
     environment:
       POSTGRES_USER: jdb # khớp owner trong dump (OWNER TO protct) để init không lỗi
       POSTGRES_PASSWORD: jdbtest
@@ -33,7 +32,6 @@ services:
   # Truy cập ở host qua cổng 5433. Nạp lại từ đầu: docker compose down -v && docker compose up -d
   postgres18:
     image: postgres:18
-    profiles: ["single", "all"]
     environment:
       POSTGRES_USER: jdb # khớp owner trong dump (OWNER TO protct) để init không lỗi
       POSTGRES_PASSWORD: jdbtest
@@ -49,6 +47,7 @@ services:
   # Nạp lại từ đầu: docker compose down -v && docker compose up -d
   postgres-multi:
     image: postgres:16
+    profiles: ["multi"]
     environment:
       POSTGRES_USER: jdb
       POSTGRES_PASSWORD: jdbtest
@@ -62,7 +61,6 @@ services:
 
   mysql:
     image: mysql:8
-    profiles: ["single", "all"]
     environment:
       MYSQL_ROOT_PASSWORD: jdbtest
       MYSQL_DATABASE: jdb_dev
@@ -78,6 +76,7 @@ services:
   # (jdb_ecommerce / jdb_healthcare / jdb_banking) — tương tự postgres-multi.
   mysql-multi:
     image: mysql:8
+    profiles: ["multi"]
     environment:
       MYSQL_ROOT_PASSWORD: jdbtest
       MYSQL_DATABASE: jdb_ecommerce
@@ -89,10 +88,28 @@ services:
       - ./db/seeds/multidb-mysql/init.sh:/docker-entrypoint-initdb.d/00-init-multi.sh:ro
       - ./db/seeds/multidb-mysql/databases:/seed/databases:ro
 
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: jdbtest
+      MARIADB_DATABASE: jdb_dev
+      MARIADB_USER: jdb
+      MARIADB_PASSWORD: jdbtest
+    ports:
+      - "3309:3306"
+    volumes:
+      - ./db/seeds/mariadb/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seeds/mariadb/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
   redis:
     image: redis:7
     ports:
       - "6379:6379"
+
+  redis8:
+    image: redis:8
+    ports:
+      - "6381:6379"
 
   # One-shot: nạp dữ liệu mẫu vào Redis rồi thoát.
   redis-seed:
@@ -104,7 +121,19 @@ services:
     restart: "no"
     command: >
       sh -c "until redis-cli -h redis ping >/dev/null 2>&1; do sleep 1; done;
-             redis-cli -h redis < /seed/seed.redis && echo 'redis seeded'"
+             redis-cli -h redis < /seed/seed7.redis && echo 'redis seeded'"
+
+  # One-shot: nạp seed vào Redis 8 (dùng JSON.SET).
+  redis8-seed:
+    image: redis:8
+    depends_on:
+      - redis8
+    volumes:
+      - ./db/seeds/redis:/seed:ro
+    restart: "no"
+    command: >
+      sh -c "until redis-cli -h redis8 ping >/dev/null 2>&1; do sleep 1; done;
+             redis-cli -h redis8 < /seed/seed8.redis && echo 'redis8 seeded'"
 
   # ════════════════════════════════════════════════════════════════════════
   # KẾT NỐI BẢO MẬT (TLS/SSL) — phục vụ test tab "TLS/SSL" của ứng dụng.
@@ -119,7 +148,7 @@ services:
   # sslrootcert = secure/tls/ca.crt (chỉ cần khi client chọn verify-ca/verify-full).
   postgres-tls:
     image: postgres:16
-    profiles: ["secure", "all"]
+    profiles: ["secure"]
     user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
     environment:
       POSTGRES_USER: jdb
@@ -140,7 +169,7 @@ services:
   # bị TỪ CHỐI dù mật khẩu đúng. Dùng để thấy rõ tác dụng của Client Auth.
   postgres-mtls:
     image: postgres:16
-    profiles: ["secure", "all"]
+    profiles: ["secure"]
     user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
     environment:
       POSTGRES_USER: jdb
@@ -161,7 +190,7 @@ services:
   # (init qua unix socket được miễn nên dữ liệu mẫu vẫn nạp bình thường).
   mysql-tls:
     image: mysql:8
-    profiles: ["secure", "all"]
+    profiles: ["secure"]
     environment:
       MYSQL_ROOT_PASSWORD: jdbtest
       MYSQL_DATABASE: jdb_dev
@@ -199,7 +228,7 @@ services:
   # One-shot: nạp dữ liệu mẫu vào redis-tls qua kết nối TLS rồi thoát.
   redis-tls-seed:
     image: redis:7
-    profiles: ["secure", "all"]
+    profiles: ["secure"]
     depends_on:
       - redis-tls
     volumes:
@@ -208,7 +237,7 @@ services:
     restart: "no"
     command: >
       sh -c "until redis-cli --tls --cacert /certs/ca.crt -h redis-tls -p 6379 ping >/dev/null 2>&1; do sleep 1; done;
-             redis-cli --tls --cacert /certs/ca.crt -h redis-tls -p 6379 < /seed/seed.redis && echo 'redis-tls seeded'"
+             redis-cli --tls --cacert /certs/ca.crt -h redis-tls -p 6379 < /seed/seed7.redis && echo 'redis-tls seeded'"
 
   # ════════════════════════════════════════════════════════════════════════
   # SSH TUNNEL — phục vụ test tab "SSH Tunnel" của ứng dụng.
@@ -220,7 +249,7 @@ services:
   # CSDL nội bộ — không có "ports:" nên host KHÔNG truy cập trực tiếp được.
   internal-postgres:
     image: postgres:16
-    profiles: ["ssh", "all"]
+    profiles: ["ssh"]
     environment:
       POSTGRES_USER: jdb
       POSTGRES_PASSWORD: jdbtest
@@ -234,7 +263,7 @@ services:
   # bật sẵn để forward TCP tới internal-postgres trong network.
   bastion:
     build: ./secure/bastion
-    profiles: ["ssh", "all"]
+    profiles: ["ssh"]
     ports:
       - "2222:2222"
     depends_on:
