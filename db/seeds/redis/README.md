@@ -8,8 +8,8 @@ Script dữ liệu mẫu cho Redis: **1000 key** đa kiểu. Dữ liệu tổng 
 
 | File | Dùng cho | JSON format |
 |---|---|---|
-| `seed7.redis` | Redis 6/7 (plain, không module) | `SET key '{"...":"..."}'` — JSON lưu dạng string |
-| `seed8.redis` | Redis 8 (built-in JSON) | `JSON.SET key $ '{"...":"..."}'` — JSON native |
+| `seed7.redis` | Redis 6/7 (plain + TimeSeries module) | `SET key`, `TS.*` |
+| `seed8.redis` | Redis 8 (built-in JSON, Vector Set + TimeSeries module) | `JSON.SET`, `VADD`, `TS.*` |
 | `queries.redis` | Demo queries cho cả hai phiên bản | |
 
 ---
@@ -26,6 +26,8 @@ Script dữ liệu mẫu cho Redis: **1000 key** đa kiểu. Dữ liệu tổng 
 | sorted set | `leaderboard:wk*` | 10 |
 | **stream** | `events:user:*` (3), `notifications:orders` (1), `audit:login` (1) | 5 |
 | **json** | `product:*:meta` (20) — `SET` string (Redis 7) hoặc `JSON.SET` (Redis 8) | 20 |
+| **timeseries** | `ts:sensor:*:temp` (3), `ts:api:requests` (1), `ts:cpu:usage` (1) — RedisTimeSeries module (cả seed7 + seed8) | 5 |
+| **vectorset** | `v:products` (8), `v:docs` (8) — Vector Set built-in Redis 8+ (chỉ seed8) | 2 |
 
 ---
 

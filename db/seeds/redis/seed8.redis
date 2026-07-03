@@ -1063,3 +1063,104 @@ XADD audit:login * user_id 8 ip "10.0.0.12" success false reason "account_locked
 XADD audit:login * user_id 3 ip "10.0.0.3" success true user_agent "Safari/18"
 XADD audit:login * user_id 1 ip "10.0.0.2" success true user_agent "Mozilla/5.0"
 XADD audit:login * user_id 7 ip "172.16.0.5" success true user_agent "Edge/125"
+
+# ── Consumer Groups ───────────────────────────────────────────────────────────
+# events:user:1 — 2 groups (analytics with 2 consumers, clickstream with 1)
+XGROUP CREATE events:user:1 analytics 0
+XGROUP CREATE events:user:1 clickstream 0
+XREADGROUP GROUP analytics consumer-1 COUNT 3 STREAMS events:user:1 >
+XREADGROUP GROUP analytics consumer-2 COUNT 2 STREAMS events:user:1 >
+XREADGROUP GROUP clickstream event-tracker COUNT 5 STREAMS events:user:1 >
+
+# notifications:orders — 2 groups (email-service, sms-service)
+XGROUP CREATE notifications:orders email-service 0
+XGROUP CREATE notifications:orders sms-service 0
+XREADGROUP GROUP email-service worker-1 COUNT 4 STREAMS notifications:orders >
+XREADGROUP GROUP email-service worker-2 COUNT 2 STREAMS notifications:orders >
+XREADGROUP GROUP sms-service worker-1 COUNT 3 STREAMS notifications:orders >
+
+# audit:login — 1 group (security-team with 2 consumers)
+XGROUP CREATE audit:login security-team 0
+XREADGROUP GROUP security-team analyst-1 COUNT 5 STREAMS audit:login >
+XREADGROUP GROUP security-team analyst-2 COUNT 3 STREAMS audit:login >
+
+# ── Time Series (RedisTimeSeries module) ──────────────────────────────────────
+TS.CREATE ts:sensor:1:temp RETENTION 86400000 LABELS sensor_id 1 room server_room
+TS.CREATE ts:sensor:2:temp RETENTION 86400000 LABELS sensor_id 2 room office
+TS.CREATE ts:sensor:3:temp RETENTION 86400000 LABELS sensor_id 3 room lobby
+TS.ADD ts:sensor:1:temp 1719700000000 22.5
+TS.ADD ts:sensor:1:temp 1719700360000 22.8
+TS.ADD ts:sensor:1:temp 1719700720000 23.1
+TS.ADD ts:sensor:1:temp 1719701080000 22.9
+TS.ADD ts:sensor:1:temp 1719701440000 22.6
+TS.ADD ts:sensor:1:temp 1719701800000 22.4
+TS.ADD ts:sensor:1:temp 1719702160000 22.7
+TS.ADD ts:sensor:1:temp 1719702520000 23.0
+TS.ADD ts:sensor:1:temp 1719702880000 23.3
+TS.ADD ts:sensor:1:temp 1719703240000 23.1
+TS.ADD ts:sensor:2:temp 1719700000000 24.0
+TS.ADD ts:sensor:2:temp 1719700360000 24.1
+TS.ADD ts:sensor:2:temp 1719700720000 24.3
+TS.ADD ts:sensor:2:temp 1719701080000 24.2
+TS.ADD ts:sensor:2:temp 1719701440000 24.0
+TS.ADD ts:sensor:2:temp 1719701800000 23.9
+TS.ADD ts:sensor:2:temp 1719702160000 24.1
+TS.ADD ts:sensor:2:temp 1719702520000 24.4
+TS.ADD ts:sensor:2:temp 1719702880000 24.5
+TS.ADD ts:sensor:2:temp 1719703240000 24.3
+TS.ADD ts:sensor:3:temp 1719700000000 21.0
+TS.ADD ts:sensor:3:temp 1719700360000 21.2
+TS.ADD ts:sensor:3:temp 1719700720000 21.5
+TS.ADD ts:sensor:3:temp 1719701080000 21.8
+TS.ADD ts:sensor:3:temp 1719701440000 22.0
+TS.ADD ts:sensor:3:temp 1719701800000 22.2
+TS.ADD ts:sensor:3:temp 1719702160000 22.1
+TS.ADD ts:sensor:3:temp 1719702520000 21.9
+TS.ADD ts:sensor:3:temp 1719702880000 21.7
+TS.ADD ts:sensor:3:temp 1719703240000 21.5
+TS.CREATE ts:api:requests RETENTION 604800000 LABELS endpoint /api/users method GET
+TS.ADD ts:api:requests 1719700000000 142
+TS.ADD ts:api:requests 1719700060000 156
+TS.ADD ts:api:requests 1719700120000 138
+TS.ADD ts:api:requests 1719700180000 167
+TS.ADD ts:api:requests 1719700240000 189
+TS.ADD ts:api:requests 1719700300000 201
+TS.ADD ts:api:requests 1719700360000 178
+TS.ADD ts:api:requests 1719700420000 165
+TS.ADD ts:api:requests 1719700480000 152
+TS.ADD ts:api:requests 1719700540000 144
+TS.ADD ts:api:requests 1719700600000 158
+TS.ADD ts:api:requests 1719700660000 172
+TS.ADD ts:api:requests 1719700720000 185
+TS.ADD ts:api:requests 1719700780000 190
+TS.ADD ts:api:requests 1719700840000 176
+TS.CREATE ts:cpu:usage RETENTION 3600000 LABELS host web-01
+TS.ADD ts:cpu:usage 1719700000000 35.2
+TS.ADD ts:cpu:usage 1719700060000 42.1
+TS.ADD ts:cpu:usage 1719700120000 38.7
+TS.ADD ts:cpu:usage 1719700180000 45.3
+TS.ADD ts:cpu:usage 1719700240000 51.8
+TS.ADD ts:cpu:usage 1719700300000 48.2
+TS.ADD ts:cpu:usage 1719700360000 40.5
+TS.ADD ts:cpu:usage 1719700420000 37.1
+TS.ADD ts:cpu:usage 1719700480000 43.6
+TS.ADD ts:cpu:usage 1719700540000 39.9
+
+# ── Vector Set (Redis 8+ built-in) ───────────────────────────────────────────
+# VADD key VALUES dim v1 v2 ... element — creates set implicitly on first call.
+VADD v:products VALUES 4 0.12 0.85 0.33 0.67 prod:101
+VADD v:products VALUES 4 0.91 0.24 0.56 0.78 prod:102
+VADD v:products VALUES 4 0.45 0.11 0.98 0.32 prod:103
+VADD v:products VALUES 4 0.67 0.54 0.21 0.88 prod:104
+VADD v:products VALUES 4 0.33 0.76 0.49 0.15 prod:105
+VADD v:products VALUES 4 0.82 0.61 0.37 0.93 prod:106
+VADD v:products VALUES 4 0.18 0.72 0.44 0.59 prod:107
+VADD v:products VALUES 4 0.95 0.28 0.63 0.41 prod:108
+VADD v:docs VALUES 4 0.11 0.42 0.77 0.33 doc:a1
+VADD v:docs VALUES 4 0.88 0.15 0.52 0.69 doc:a2
+VADD v:docs VALUES 4 0.36 0.94 0.21 0.58 doc:a3
+VADD v:docs VALUES 4 0.73 0.29 0.65 0.44 doc:a4
+VADD v:docs VALUES 4 0.55 0.81 0.38 0.17 doc:a5
+VADD v:docs VALUES 4 0.49 0.86 0.23 0.71 doc:a6
+VADD v:docs VALUES 4 0.64 0.31 0.92 0.47 doc:b1
+VADD v:docs VALUES 4 0.19 0.76 0.53 0.28 doc:b2

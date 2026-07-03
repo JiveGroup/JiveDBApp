@@ -1083,3 +1083,23 @@ XADD audit:login * user_id 8 ip "10.0.0.12" success false reason "account_locked
 XADD audit:login * user_id 3 ip "10.0.0.3" success true user_agent "Safari/18"
 XADD audit:login * user_id 1 ip "10.0.0.2" success true user_agent "Mozilla/5.0"
 XADD audit:login * user_id 7 ip "172.16.0.5" success true user_agent "Edge/125"
+
+# ── Consumer Groups ───────────────────────────────────────────────────────────
+# events:user:1 — 2 groups (analytics with 2 consumers, clickstream with 1)
+XGROUP CREATE events:user:1 analytics 0
+XGROUP CREATE events:user:1 clickstream 0
+XREADGROUP GROUP analytics consumer-1 COUNT 3 STREAMS events:user:1 >
+XREADGROUP GROUP analytics consumer-2 COUNT 2 STREAMS events:user:1 >
+XREADGROUP GROUP clickstream event-tracker COUNT 5 STREAMS events:user:1 >
+
+# notifications:orders — 2 groups (email-service, sms-service)
+XGROUP CREATE notifications:orders email-service 0
+XGROUP CREATE notifications:orders sms-service 0
+XREADGROUP GROUP email-service worker-1 COUNT 4 STREAMS notifications:orders >
+XREADGROUP GROUP email-service worker-2 COUNT 2 STREAMS notifications:orders >
+XREADGROUP GROUP sms-service worker-1 COUNT 3 STREAMS notifications:orders >
+
+# audit:login — 1 group (security-team with 2 consumers)
+XGROUP CREATE audit:login security-team 0
+XREADGROUP GROUP security-team analyst-1 COUNT 5 STREAMS audit:login >
+XREADGROUP GROUP security-team analyst-2 COUNT 3 STREAMS audit:login >
