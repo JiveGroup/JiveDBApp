@@ -32,8 +32,10 @@ JiveDB làm việc với các hệ phổ biến trong cùng một giao diện th
 |---|---|
 | **PostgreSQL** | Nhiều schema, chuyển schema nhanh, xem định nghĩa đối tượng (DDL). |
 | **MySQL** | Quản lý bảng/view/chỉ mục/thủ tục theo từng database. |
+| **MariaDB** | Quy trình giống MySQL, có loại kết nối riêng. |
 | **SQLite** | Mở file cục bộ, gọn nhẹ, không cần máy chủ. |
 | **Redis** | Trình duyệt khoá/giá trị cho thao tác nhanh. |
+| **MongoDB** | Duyệt collection/document, trường lồng nhau, chỉ mục. |
 
 ---
 
@@ -103,7 +105,7 @@ JiveDB làm việc với các hệ phổ biến trong cùng một giao diện th
 
 ## 8. Bắt đầu nhanh
 
-1. Mở JiveDB và **tạo một kết nối** tới PostgreSQL, MySQL, SQLite hoặc Redis.
+1. Mở JiveDB và **tạo một kết nối** tới PostgreSQL, MySQL, MariaDB, SQLite, Redis hoặc MongoDB.
 2. Duyệt cây đối tượng ở thanh bên, **mở một bảng** để xem dữ liệu.
 3. Dùng **lưới dữ liệu** để lọc, sắp xếp, chỉnh sửa hoặc xuất file.
 4. Mở **SQL Editor** để chạy truy vấn, hoặc xem **ERD** để hiểu quan hệ giữa các bảng.
@@ -159,19 +161,20 @@ Từ thư mục gốc của repo:
 docker compose up -d
 ```
 
-Mặc định lệnh này chỉ dựng **nhóm chính**: `postgres-multi` (PostgreSQL nhiều database, cổng `5436`), `mysql-multi` (MySQL nhiều database, cổng `3308`), `redis` và `redis-seed`. Các service còn lại được gom theo **Compose profile** và chỉ chạy khi bạn yêu cầu:
+Mặc định lệnh này dựng **nhóm mặc định** (12 service): `postgres`, `postgres18`, `mysql`, `mariadb`, `mongodb` + `mongodb8` (kèm service `*-rs-init` tương ứng), `redis`, `redis8` và 2 job seed Redis. Các service còn lại được gom theo **Compose profile** và chỉ chạy khi bạn yêu cầu:
 
 ```bash
-docker compose --profile single up -d   # postgres (5432) + postgres18 (5433) + mysql (3306)
+docker compose --profile multi  up -d   # postgres-multi (5436) + mysql-multi (3308)
 docker compose --profile secure up -d   # các CSDL TLS / mTLS (xem §10.7)
 docker compose --profile ssh    up -d   # SSH bastion + internal-postgres
-docker compose --profile all    up -d   # tất cả cùng lúc
+docker compose --profile standalone up -d  # mongodb-standalone (27019, không replica set)
+docker compose --profile all    up -d   # tất cả những cái trên (trừ mongodb-writer)
 docker compose up -d postgres-tls       # hoặc gọi đích danh từng service
 ```
 
 Dữ liệu mẫu **tự nạp khi container khởi tạo lần đầu**:
 
-- **PostgreSQL / MySQL**: chạy các file `*.sql` trong `db/seeds/<db>/` qua `/docker-entrypoint-initdb.d`.
+- **PostgreSQL / MySQL / MongoDB**: chạy các file `*.sql` (hoặc `*.js` với MongoDB) trong `db/seeds/<db>/` qua `/docker-entrypoint-initdb.d`.
 - **Redis**: service `redis-seed` nạp `db/seeds/redis/seed.redis` ngay sau khi Redis sẵn sàng rồi tự thoát.
 
 ### 10.2. Thông tin đăng nhập (chỉ để test)
@@ -180,24 +183,30 @@ Dùng các thông số dưới đây để **tạo kết nối trong JiveDB** t�
 
 | CSDL | Host | Port | User | Password | Database |
 |---|---|---|---|---|---|
-| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 3 databases (×3 schemas) — *nhóm chính, mặc định* |
-| MySQL multi-db | `localhost` | `3308` | `jdb` | `jdbtest` | 3 databases — *nhóm chính, mặc định* |
-| Redis 7 | `localhost` | `6379` | — | — | `db0` (không mật khẩu) — *nhóm chính, mặc định* |
-| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
-| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
-| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
+| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 3 databases (×3 schemas) — *profile `multi`* |
+| MySQL multi-db | `localhost` | `3308` | `jdb` | `jdbtest` | 3 databases — *profile `multi`* |
+| Redis 7 | `localhost` | `6379` | — | — | `db0` (không mật khẩu) — *mặc định* |
+| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` — *mặc định* |
+| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` — *mặc định* |
+| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` — *mặc định* |
+| MariaDB 11 | `localhost` | `3309` | `jdb` | `jdbtest` | `jdb_dev` — *mặc định* |
+| MongoDB 7 | `localhost` | `27017` | `jdb` | `jdbtest` | `jdb_dev` (auth database `admin`, replica set `rs0`) |
+| MongoDB 8 | `localhost` | `27018` | `jdb` | `jdbtest` | `jdb_dev` (auth database `admin`, replica set `rs0`) |
+| MongoDB standalone | `localhost` | `27019` | `jdb` | `jdbtest` | `jdb_dev` (auth database `admin`, không replica set) — *profile `standalone`* |
 | SQLite | — | — | — | — | mở trực tiếp file `.sqlite` (xem dưới) |
 
 Ghi chú theo từng CSDL:
 
-- **PostgreSQL multi-db** (nhóm chính) — instance ở cổng **`5436`** có **3 databases × 3 schemas** (e-commerce / healthcare / banking) để test duyệt nhiều database.
-- **MySQL multi-db** (nhóm chính) — instance ở cổng **`3308`**, một tài khoản `jdb` nhìn thấy **3 databases** (`jdb_ecommerce` / `jdb_healthcare` / `jdb_banking`).
-- **PostgreSQL single** (profile `single`) — hai phiên bản song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`.
-- **MySQL single** (profile `single`) — cổng `3306`; ngoài `jdb` / `jdbtest` còn có tài khoản quản trị **`root`** mật khẩu `jdbtest` nếu cần.
+- **PostgreSQL multi-db** (profile `multi`) — instance ở cổng **`5436`** có **3 databases × 3 schemas** (e-commerce / healthcare / banking) để test duyệt nhiều database.
+- **MySQL multi-db** (profile `multi`) — instance ở cổng **`3308`**, một tài khoản `jdb` nhìn thấy **3 databases** (`jdb_ecommerce` / `jdb_healthcare` / `jdb_banking`).
+- **PostgreSQL** (nhóm mặc định) — hai phiên bản song song: **16** ở cổng `5432` và **18** ở cổng `5433`, cùng tài khoản `jdb` / `jdbtest`, database `jdb_dev`.
+- **MySQL** (nhóm mặc định) — cổng `3306`; ngoài `jdb` / `jdbtest` còn có tài khoản quản trị **`root`** mật khẩu `jdbtest` nếu cần.
+- **MariaDB** (nhóm mặc định) — cổng `3309`; dùng chung dữ liệu mẫu với MySQL (file schema/data tương thích MySQL).
+- **MongoDB** — hai phiên bản song song: **7** ở cổng `27017` và **8** ở cổng `27018`, đều chạy **replica set** 1 node `rs0` (bắt buộc để 2 panel Change Tail và Topology dùng được) và dùng chung bộ seed. Ngoài ra có instance **standalone** ở cổng `27019` (profile `standalone`) để demo nhánh capability ngược lại — không có change stream, topology báo "single". `jdb` là tài khoản **root** (Mongo không có khái niệm "app user" riêng theo mặc định) nên xác thực qua database `admin`. Chế độ replica set cần chạy `./secure/gen.sh` một lần để sinh keyfile — xem `db/seeds/mongodb/README.md`.
 - **Redis** — không bật xác thực; dữ liệu mẫu nằm ở DB index `0`.
 - **SQLite** — không cần Docker, mở thẳng file bằng JiveDB: `db/seeds/sqlite/jdb.sqlite`
 
-> Mẹo: với `make` (xem `Makefile`), bạn có thể mở nhanh shell vào DB — `make pg-multi`, `make mysql-multi`, `make redis-cli` cho nhóm chính, hoặc `make psql` / `make mysql` sau khi chạy `make up-single`.
+> Mẹo: với `make` (xem `Makefile`) — `make psql`, `make mysql`, `make mariadb`, `make mongo`, `make redis-cli` mở shell vào nhóm mặc định; `make pg-multi` / `make mysql-multi` sau khi chạy `make up-multi`. `make smoke` ping mọi service đang chạy, còn `make verify-mongo` kiểm tra bộ seed MongoDB còn nguyên vẹn.
 
 ### 10.3. Dữ liệu mẫu
 

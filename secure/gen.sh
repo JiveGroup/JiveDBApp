@@ -8,6 +8,7 @@
 # Kết quả:
 #   secure/tls/   ca.crt, ca.key, <db>.crt/.key (server), client.crt/.key (mTLS)
 #   secure/ssh/   id_ed25519, id_ed25519.pub   (cặp khoá SSH cho bastion)
+#   secure/mongo/ keyfile                       (internal auth cho MongoDB replica set)
 #
 # Các đường dẫn này chính là thứ khai báo trong tab "TLS/SSL" và "SSH Tunnel"
 # của ứng dụng JDB (xem secure/README.md).
@@ -16,9 +17,10 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TLS="$HERE/tls"
 SSHDIR="$HERE/ssh"
+MONGODIR="$HERE/mongo"
 DAYS=3650
 
-mkdir -p "$TLS" "$SSHDIR"
+mkdir -p "$TLS" "$SSHDIR" "$MONGODIR"
 
 echo "==> Sinh chứng chỉ TLS vào $TLS"
 
@@ -79,6 +81,20 @@ else
 fi
 chmod 600 "$SSHDIR/id_ed25519"
 chmod 644 "$SSHDIR/id_ed25519.pub"
+
+# ── Keyfile nội bộ cho MongoDB replica set ──────────────────────────────────
+# Bắt buộc khi bật cả --auth lẫn --replSet, kể cả replica set 1 node: các thành
+# viên xác thực LẪN NHAU bằng keyfile này (không liên quan user/password của
+# client). secure/mongo-entrypoint.sh sẽ copy + chmod 400 lại bên trong
+# container trước khi khởi động mongod (permission mount từ host không đủ chặt).
+echo "==> Sinh keyfile MongoDB vào $MONGODIR"
+if [ -f "$MONGODIR/keyfile" ]; then
+  echo "    keyfile đã tồn tại — giữ nguyên"
+else
+  openssl rand -base64 756 > "$MONGODIR/keyfile"
+  echo "    keyfile"
+fi
+chmod 600 "$MONGODIR/keyfile"
 
 echo
 echo "Hoàn tất. Xem secure/README.md để biết tham số khai báo trong ứng dụng."

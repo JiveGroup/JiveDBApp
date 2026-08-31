@@ -32,8 +32,10 @@ JiveDB works with popular engines in one unified interface:
 |---|---|
 | **PostgreSQL** | Multiple schemas, fast schema switching, view object definitions (DDL). |
 | **MySQL** | Manage tables/views/indexes/procedures per database. |
+| **MariaDB** | Same workflow as MySQL, dedicated connection type. |
 | **SQLite** | Open local files, lightweight, no server required. |
 | **Redis** | Key/value browser for quick operations. |
+| **MongoDB** | Browse collections/documents, nested fields, indexes. |
 
 ---
 
@@ -103,7 +105,7 @@ This is where you spend most of your time, and JiveDB invests heavily to make it
 
 ## 8. Quick start
 
-1. Open JiveDB and **create a connection** to PostgreSQL, MySQL, SQLite or Redis.
+1. Open JiveDB and **create a connection** to PostgreSQL, MySQL, MariaDB, SQLite, Redis or MongoDB.
 2. Browse the object tree in the sidebar, **open a table** to view its data.
 3. Use the **data grid** to filter, sort, edit or export.
 4. Open the **SQL Editor** to run queries, or view the **ERD** to understand the relationships between tables.
@@ -159,19 +161,20 @@ From the root of the repo:
 docker compose up -d
 ```
 
-By default this only starts the **core group**: `postgres-multi` (multi-database PostgreSQL, port `5436`), `mysql-multi` (multi-database MySQL, port `3308`), `redis` and `redis-seed`. The other services are grouped under **Compose profiles** and only start when you ask for them:
+By default this starts the **default group** (12 services): `postgres`, `postgres18`, `mysql`, `mariadb`, `mongodb` + `mongodb8` (each with its `*-rs-init` companion), `redis`, `redis8` and the two Redis seed jobs. The other services are grouped under **Compose profiles** and only start when you ask for them:
 
 ```bash
-docker compose --profile single up -d   # plain postgres (5432) + postgres18 (5433) + mysql (3306)
+docker compose --profile multi  up -d   # postgres-multi (5436) + mysql-multi (3308)
 docker compose --profile secure up -d   # TLS / mTLS databases (see §10.7)
 docker compose --profile ssh    up -d   # SSH bastion + internal-postgres
-docker compose --profile all    up -d   # everything at once
+docker compose --profile standalone up -d  # mongodb-standalone (27019, no replica set)
+docker compose --profile all    up -d   # everything above (except mongodb-writer)
 docker compose up -d postgres-tls       # or start any single service by name
 ```
 
 The sample data **loads automatically when the containers are first initialized**:
 
-- **PostgreSQL / MySQL**: run the `*.sql` files in `db/seeds/<db>/` via `/docker-entrypoint-initdb.d`.
+- **PostgreSQL / MySQL / MongoDB**: run the `*.sql` (or `*.js` for MongoDB) files in `db/seeds/<db>/` via `/docker-entrypoint-initdb.d`.
 - **Redis**: the `redis-seed` service loads `db/seeds/redis/seed.redis` right after Redis is ready, then exits.
 
 ### 10.2. Login credentials (for testing only)
@@ -180,24 +183,30 @@ Use the settings below to **create a connection in JiveDB** to the sample data y
 
 | Database | Host | Port | User | Password | Database |
 |---|---|---|---|---|---|
-| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 3 databases (×3 schemas) — *core, default* |
-| MySQL multi-db | `localhost` | `3308` | `jdb` | `jdbtest` | 3 databases — *core, default* |
-| Redis 7 | `localhost` | `6379` | — | — | `db0` (no password) — *core, default* |
-| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
-| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
-| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` — *profile `single`* |
+| PostgreSQL multi-db | `localhost` | `5436` | `jdb` | `jdbtest` | 3 databases (×3 schemas) — *profile `multi`* |
+| MySQL multi-db | `localhost` | `3308` | `jdb` | `jdbtest` | 3 databases — *profile `multi`* |
+| Redis 7 | `localhost` | `6379` | — | — | `db0` (no password) — *default* |
+| PostgreSQL 16 | `localhost` | `5432` | `jdb` | `jdbtest` | `jdb_dev` — *default* |
+| PostgreSQL 18 | `localhost` | `5433` | `jdb` | `jdbtest` | `jdb_dev` — *default* |
+| MySQL 8 | `localhost` | `3306` | `jdb` | `jdbtest` | `jdb_dev` — *default* |
+| MariaDB 11 | `localhost` | `3309` | `jdb` | `jdbtest` | `jdb_dev` — *default* |
+| MongoDB 7 | `localhost` | `27017` | `jdb` | `jdbtest` | `jdb_dev` (auth database `admin`, replica set `rs0`) |
+| MongoDB 8 | `localhost` | `27018` | `jdb` | `jdbtest` | `jdb_dev` (auth database `admin`, replica set `rs0`) |
+| MongoDB standalone | `localhost` | `27019` | `jdb` | `jdbtest` | `jdb_dev` (auth database `admin`, no replica set) — *profile `standalone`* |
 | SQLite | — | — | — | — | open the `.sqlite` file directly (see below) |
 
 Per-database notes:
 
-- **PostgreSQL multi-db** (core) — instance on port **`5436`** with **3 databases × 3 schemas** (e-commerce / healthcare / banking), for testing multi-database navigation.
-- **MySQL multi-db** (core) — instance on port **`3308`** where the single `jdb` account sees **3 databases** (`jdb_ecommerce` / `jdb_healthcare` / `jdb_banking`).
-- **PostgreSQL single** (profile `single`) — two versions side by side: **16** on port `5432` and **18** on port `5433`, both account `jdb` / `jdbtest`, database `jdb_dev`.
-- **MySQL single** (profile `single`) — port `3306`; besides `jdb` / `jdbtest` there is an admin **`root`** account with password `jdbtest` if needed.
+- **PostgreSQL multi-db** (profile `multi`) — instance on port **`5436`** with **3 databases × 3 schemas** (e-commerce / healthcare / banking), for testing multi-database navigation.
+- **MySQL multi-db** (profile `multi`) — instance on port **`3308`** where the single `jdb` account sees **3 databases** (`jdb_ecommerce` / `jdb_healthcare` / `jdb_banking`).
+- **PostgreSQL** (default group) — two versions side by side: **16** on port `5432` and **18** on port `5433`, both account `jdb` / `jdbtest`, database `jdb_dev`.
+- **MySQL** (default group) — port `3306`; besides `jdb` / `jdbtest` there is an admin **`root`** account with password `jdbtest` if needed.
+- **MariaDB** (default group) — port `3309`; same seed data as MySQL (schema/data files are MySQL-compatible).
+- **MongoDB** — two versions side by side: **7** on port `27017` and **8** on port `27018`, both running a single-node **replica set** `rs0` (required for the Change Tail and Topology panels) and sharing the same seed scripts. A third, **standalone** instance on port `27019` (profile `standalone`) exists to demo the opposite capability path — no change streams, topology reported as "single". `jdb` is the **root** user (Mongo has no separate app-user concept out of the box), so authenticate against database `admin`. Replica-set mode needs `./secure/gen.sh` to have been run once (keyfile) — see `db/seeds/mongodb/README.md`.
 - **Redis** — authentication is disabled; the sample data lives in DB index `0`.
 - **SQLite** — no Docker needed, open the file directly in JiveDB: `db/seeds/sqlite/jdb.sqlite`
 
-> Tip: with `make` (see `Makefile`), you can quickly open a shell into a DB — `make pg-multi`, `make mysql-multi`, `make redis-cli` for the core group, or `make psql` / `make mysql` after `make up-single`.
+> Tip: with `make` (see `Makefile`) — `make psql`, `make mysql`, `make mariadb`, `make mongo`, `make redis-cli` open a shell into the default group; `make pg-multi` / `make mysql-multi` after `make up-multi`. `make smoke` pings every running service, and `make verify-mongo` asserts the MongoDB seed is still intact.
 
 ### 10.3. Sample data
 

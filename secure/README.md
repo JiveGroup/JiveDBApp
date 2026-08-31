@@ -29,10 +29,17 @@ secure/tls/
   client.crt    .key       # client cert (CN=jdb) cho mTLS
 secure/ssh/
   id_ed25519  id_ed25519.pub   # cặp khoá SSH cho bastion
+secure/mongo/
+  keyfile                      # internal auth cho MongoDB replica set (mongodb/mongodb8)
 ```
 
 Server cert có SAN gồm `localhost`, `127.0.0.1` và tên service → dùng được tới
-mode `verify-full`. Chạy lại script là sinh đè (SSH key thì giữ nguyên nếu đã có).
+mode `verify-full`. Chạy lại script là sinh đè (SSH key và mongo keyfile thì giữ
+nguyên nếu đã có).
+
+`secure/mongo/keyfile` không thuộc 2 tính năng TLS/SSH ở trên — đây là yêu cầu
+nội bộ của MongoDB khi bật cả `--replSet` lẫn `--auth` cùng lúc (xác thực giữa
+các thành viên replica set, kể cả 1 node). Xem `db/seeds/mongodb/README.md`.
 
 ---
 

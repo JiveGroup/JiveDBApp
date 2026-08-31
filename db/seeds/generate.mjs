@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-// Sinh dữ liệu mẫu (schema + data) cho PostgreSQL, MySQL, SQLite và Redis.
+// Sinh dữ liệu mẫu (schema + data) cho PostgreSQL, MySQL, SQLite, Redis và MongoDB.
 // Dữ liệu tổng hợp, tất định (RNG có seed) — chạy lại cho kết quả giống nhau.
 //   node db/seeds/generate.mjs
 //
 // Bộ dữ liệu gồm 17 bảng có quan hệ + views + triggers + object types (PG),
-// tổng ~40k–50k dòng; Redis ~1000 key đa dạng.
+// tổng ~40k–50k dòng; Redis ~1000 key đa dạng; MongoDB dùng lại cùng dữ liệu
+// (17 bảng → collection, id → _id).
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -589,6 +590,49 @@ function redisSeed() {
   return L.join('\n') + '\n'
 }
 
+// ── MongoDB (17 bảng → collection, dùng lại D) ────────────────────────────────────
+function toMongoLiteral(v) {
+  if (v === null || v === undefined) return 'null'
+  if (v instanceof Date) return `ISODate("${v.toISOString()}")`
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (typeof v === 'string') return JSON.stringify(v)
+  if (Array.isArray(v)) return `[${v.map(toMongoLiteral).join(', ')}]`
+  return `{ ${Object.entries(v).map(([k, val]) => `${k}: ${toMongoLiteral(val)}`).join(', ')} }`
+}
+
+function mongoDoc(tb, row) {
+  const obj = {}
+  for (const c of tb.cols) {
+    const key = c.type === 'pk' ? '_id' : c.name
+    // events.payload là chuỗi JSON trong SQL → nhúng thành object lồng nhau (đúng chất Mongo)
+    obj[key] = tb.name === 'events' && c.name === 'payload' ? JSON.parse(row[c.name]) : row[c.name]
+  }
+  return obj
+}
+
+function mongoSeed() {
+  const out = [
+    '// MongoDB — sinh tự động từ generate.mjs, KHÔNG sửa tay.',
+    "// Chạy tự động khi container 'mongodb' khởi tạo lần đầu (docker-entrypoint-initdb.d).",
+    "db = db.getSiblingDB('jdb_dev');",
+    '',
+  ]
+  for (const tb of SEEDED) {
+    const rows = D[tb.name]
+    if (!rows?.length) continue
+    out.push(`db.${tb.name}.drop();`)
+    for (let i = 0; i < rows.length; i += 500) {
+      const docs = rows.slice(i, i + 500).map((r) => toMongoLiteral(mongoDoc(tb, r)))
+      out.push(`db.${tb.name}.insertMany([\n${docs.join(',\n')}\n]);`)
+    }
+    for (const c of tb.cols) if (c.unique) out.push(`db.${tb.name}.createIndex({ ${c.name}: 1 }, { unique: true });`)
+    if (tb.unique) out.push(`db.${tb.name}.createIndex({ ${tb.unique.map((f) => `${f}: 1`).join(', ')} }, { unique: true });`)
+    out.push('')
+  }
+  out.push(`print('mongodb seeded: ' + ${JSON.stringify(SEEDED.map((t) => t.name))}.map((c) => c + '=' + db[c].countDocuments()).join(', '));`)
+  return out.join('\n') + '\n'
+}
+
 // ── Ghi file ─────────────────────────────────────────────────────────────────────────
 function write(rel, content) {
   const p = join(ROOT, rel)
@@ -608,6 +652,7 @@ const written = [
   write('sqlite/schema.sql', schemaSQL('sqlite')),
   write('sqlite/data.sql', dataSQL('sqlite')),
   write('redis/seed.redis', redisSeed()),
+  write('mongodb/01-seed.js', mongoSeed()),
 ]
 console.log('Đã sinh:')
 for (const w of written) console.log('  •', w)

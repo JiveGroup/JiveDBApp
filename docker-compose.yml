@@ -1,19 +1,29 @@
 # Hạ tầng CSDL phục vụ test thủ công backend (KHÔNG dùng cho production).
 # Thông tin đăng nhập dưới đây chỉ là giá trị test cục bộ.
 #
-# MẶC ĐỊNH chỉ start nhóm chính (không gắn profile):
-#   postgres-multi, mysql-multi, redis, redis-seed
+# MẶC ĐỊNH start nhóm chính (không gắn profile) — 12 service:
+#   postgres, postgres18, mysql, mariadb, redis, redis8, redis-seed, redis8-seed,
+#   mongodb, mongodb-rs-init, mongodb8, mongodb8-rs-init
 #     docker compose up -d
+#   (cần secure/mongo/keyfile — chạy ./secure/gen.sh một lần trước, xem mongodb bên dưới)
 #
 # Các service khác gắn "profiles" → chỉ chạy khi BẬT profile hoặc gọi đích danh:
-#   docker compose --profile single up -d   # postgres, postgres18, mysql
-#   docker compose --profile secure up -d   # *-tls, *-mtls, redis-tls
-#   docker compose --profile ssh    up -d   # bastion + internal-postgres
-#   docker compose --profile all    up -d   # tất cả
-#   docker compose up -d postgres-tls       # gọi đích danh 1 service bất kỳ
+#   docker compose --profile multi      up -d   # postgres-multi, mysql-multi
+#   docker compose --profile secure     up -d   # *-tls, *-mtls, redis-tls
+#   docker compose --profile ssh        up -d   # bastion + internal-postgres
+#   docker compose --profile standalone up -d   # mongodb-standalone (27019)
+#   docker compose --profile all        up -d   # tất cả những cái trên
+#   docker compose up -d postgres-tls           # gọi đích danh 1 service bất kỳ
+#
+# Mọi service có profile đều khai thêm "all" để `--profile all` đúng nghĩa "tất cả"
+# (trước đây chỉ 2 service khai, nên lệnh đó im lặng bỏ sót multi/secure/ssh).
+# NGOẠI LỆ có chủ đích: `mongodb-writer` (profile "mongo-writer") KHÔNG thuộc "all"
+# — nó là vòng lặp ghi liên tục để demo Change Tail, không phải một CSDL, nên
+# không nên tự khởi động kèm.
 #
 # Dữ liệu mẫu tự nạp khi container khởi tạo LẦN ĐẦU:
-#   - PostgreSQL / MySQL: chạy *.sql trong db/seeds/<db>/ qua /docker-entrypoint-initdb.d
+#   - PostgreSQL / MySQL / MongoDB: chạy *.sql (hoặc *.js với Mongo) trong
+#     db/seeds/<db>/ qua /docker-entrypoint-initdb.d
 #   - Redis: service "redis-seed" nạp db/seeds/redis/seed.redis sau khi redis sẵn sàng
 # Nạp lại từ đầu (xoá volume cũ):  docker compose down -v && docker compose up -d
 services:
@@ -47,7 +57,7 @@ services:
   # Nạp lại từ đầu: docker compose down -v && docker compose up -d
   postgres-multi:
     image: postgres:16
-    profiles: ["multi"]
+    profiles: ["multi", "all"]
     environment:
       POSTGRES_USER: jdb
       POSTGRES_PASSWORD: jdbtest
@@ -76,7 +86,7 @@ services:
   # (jdb_ecommerce / jdb_healthcare / jdb_banking) — tương tự postgres-multi.
   mysql-multi:
     image: mysql:8
-    profiles: ["multi"]
+    profiles: ["multi", "all"]
     environment:
       MYSQL_ROOT_PASSWORD: jdbtest
       MYSQL_DATABASE: jdb_ecommerce
@@ -100,6 +110,162 @@ services:
     volumes:
       - ./db/seeds/mariadb/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./db/seeds/mariadb/02-data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+
+  # MongoDB: dùng lại cùng dữ liệu mẫu (17 bảng → collection) + dữ liệu/cấu trúc bổ
+  # sung riêng cho Mongo (02-features.js — xem db/seeds/mongodb/README.md). Tài
+  # khoản `jdb` là root user (Mongo không có khái niệm "app user" tách biệt như
+  # Postgres/MySQL trừ khi tự tạo thêm bằng createUser trong init script).
+  #
+  # Chạy single-node replica set (--replSet rs0) thay vì standalone → 2 tính năng
+  # Live Ops của JiveDB — Change Tail (change streams) và Topology (replica set) —
+  # giờ dùng được, thứ mà một mongod standalone không bao giờ hỗ trợ.
+  #
+  # rs.initiate() KHÔNG thể chạy qua docker-entrypoint-initdb.d: khi có
+  # MONGO_INITDB_ROOT_USERNAME, entrypoint gốc chạy init script (01-seed.js,
+  # 02-features.js) trên một instance mongod TẠM THỜI, tự khởi động mà KHÔNG kèm
+  # --replSet dù command của service có khai báo gì đi nữa — nên rs.status()/
+  # rs.initiate() ở đó luôn báo "not started with replication enabled". Vì vậy
+  # việc initiate được tách ra service `mongodb-rs-init` bên dưới, chạy đúng 1 lần
+  # nhắm vào instance THẬT (sau khi entrypoint restart với --replSet) — cùng kiểu
+  # "chờ rồi chạy 1 lần" như service `redis-seed` đã có sẵn trong file này.
+  #
+  # --replSet + --auth cùng lúc bắt buộc phải có --keyFile (xác thực nội bộ giữa
+  # các thành viên replica set, kể cả 1 node) → secure/mongo-entrypoint.sh chỉnh
+  # quyền keyfile (secure/mongo/keyfile, sinh bằng secure/gen.sh) rồi mới gọi mongod,
+  # cùng kỹ thuật với secure/postgres-tls-entrypoint.sh.
+  mongodb:
+    image: mongo:7
+    user: root # entrypoint gốc tự gosu xuống user mongodb sau khi ta sửa quyền keyfile
+    entrypoint: ["bash", "/usr/local/bin/mongo-entrypoint.sh"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: jdb
+      MONGO_INITDB_ROOT_PASSWORD: jdbtest
+      MONGO_INITDB_DATABASE: jdb_dev
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./secure/mongo-entrypoint.sh:/usr/local/bin/mongo-entrypoint.sh:ro
+      - ./secure/mongo/keyfile:/keyfile-src/keyfile:ro
+      - ./db/seeds/mongodb/01-seed.js:/docker-entrypoint-initdb.d/01-seed.js:ro
+      - ./db/seeds/mongodb/02-features.js:/docker-entrypoint-initdb.d/02-features.js:ro
+
+  # Khởi tạo replica set rs0 cho `mongodb` — chạy đúng 1 lần, xem ghi chú ở trên.
+  # Thành viên được khai báo là "localhost:27017" (không phải "mongodb:27017")
+  # vì JiveDB (chạy trên máy host) luôn kết nối qua cổng publish 27017 trên
+  # localhost — nếu khai "mongodb:27017" thì driver bên ngoài container sẽ không
+  # resolve được hostname này khi khám phá topology. Container này chỉ dùng tên
+  # DNS nội bộ `mongodb` để MỞ KẾT NỐI cấu hình, không liên quan tên thành viên.
+  # Sau khi initiate, service này chạy TIẾP db/seeds/mongodb/03-warmup.js. Lý do
+  # phải để ở đây thay vì trong 02-features.js: bộ đếm $indexStats và mức profiling
+  # gắn với TIẾN TRÌNH mongod, mà script trong docker-entrypoint-initdb.d chạy trên
+  # mongod tạm rồi bị tắt đi — nên hâm nóng ở đó sẽ mất sạch sau restart.
+  #
+  # Mọi lệnh mongosh ở đây dùng directConnection=true: sau khi rs0 tồn tại, driver
+  # sẽ khám phá topology và thấy thành viên tên "localhost:27017" — địa chỉ đó
+  # đúng với JiveDB trên máy host nhưng TRONG container này lại trỏ về chính nó,
+  # nên nếu để driver tự khám phá thì kết nối sẽ hỏng. directConnection tắt hẳn
+  # bước khám phá đó và nói chuyện thẳng với container `mongodb`.
+  mongodb-rs-init:
+    image: mongo:7
+    depends_on:
+      - mongodb
+    restart: "no"
+    volumes:
+      - ./db/seeds/mongodb/03-warmup.js:/seed/03-warmup.js:ro
+    entrypoint: ["bash", "-c"]
+    command:
+      - >
+        until mongosh --host mongodb --port 27017 -u jdb -p jdbtest --authenticationDatabase admin --quiet --eval "db.runCommand({ping:1})" >/dev/null 2>&1; do sleep 1; done;
+        mongosh --host mongodb --port 27017 -u jdb -p jdbtest --authenticationDatabase admin --quiet --eval '
+          try { rs.status(); print("rs0: already initiated"); }
+          catch (e) { rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "localhost:27017" }] }); print("rs0: initiated"); }
+        ';
+        until mongosh "mongodb://jdb:jdbtest@mongodb:27017/?authSource=admin&directConnection=true" --quiet --eval 'db.hello().isWritablePrimary' 2>/dev/null | grep -q true; do sleep 1; done;
+        mongosh "mongodb://jdb:jdbtest@mongodb:27017/?authSource=admin&directConnection=true" --quiet /seed/03-warmup.js
+
+  # MongoDB 8: cùng seed script với mongodb (không có cú pháp riêng theo phiên bản
+  # như Redis 7/8 nên dùng chung 01-seed.js/02-features.js). Host: localhost:27018
+  mongodb8:
+    image: mongo:8
+    user: root
+    entrypoint: ["bash", "/usr/local/bin/mongo-entrypoint.sh"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: jdb
+      MONGO_INITDB_ROOT_PASSWORD: jdbtest
+      MONGO_INITDB_DATABASE: jdb_dev
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./secure/mongo-entrypoint.sh:/usr/local/bin/mongo-entrypoint.sh:ro
+      - ./secure/mongo/keyfile:/keyfile-src/keyfile:ro
+      - ./db/seeds/mongodb/01-seed.js:/docker-entrypoint-initdb.d/01-seed.js:ro
+      - ./db/seeds/mongodb/02-features.js:/docker-entrypoint-initdb.d/02-features.js:ro
+
+  # Khởi tạo replica set rs0 + hâm nóng cho `mongodb8` — xem ghi chú ở mongodb-rs-init.
+  mongodb8-rs-init:
+    image: mongo:8
+    depends_on:
+      - mongodb8
+    restart: "no"
+    volumes:
+      - ./db/seeds/mongodb/03-warmup.js:/seed/03-warmup.js:ro
+    entrypoint: ["bash", "-c"]
+    command:
+      - >
+        until mongosh --host mongodb8 --port 27017 -u jdb -p jdbtest --authenticationDatabase admin --quiet --eval "db.runCommand({ping:1})" >/dev/null 2>&1; do sleep 1; done;
+        mongosh --host mongodb8 --port 27017 -u jdb -p jdbtest --authenticationDatabase admin --quiet --eval '
+          try { rs.status(); print("rs0: already initiated"); }
+          catch (e) { rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "localhost:27017" }] }); print("rs0: initiated"); }
+        ';
+        until mongosh "mongodb://jdb:jdbtest@mongodb8:27017/?authSource=admin&directConnection=true" --quiet --eval 'db.hello().isWritablePrimary' 2>/dev/null | grep -q true; do sleep 1; done;
+        mongosh "mongodb://jdb:jdbtest@mongodb8:27017/?authSource=admin&directConnection=true" --quiet /seed/03-warmup.js
+
+  # ── MongoDB STANDALONE (không replica set) — cổng 27019 ────────────────────
+  # Chuyển cả mongodb lẫn mongodb8 sang replica set đã vô tình làm MẤT khả năng
+  # demo nhánh ngược lại: probeCapabilities báo topology "single" và
+  # changeStreams=false, khiến Change Tail hiện màn giải thích "cần replica set"
+  # còn Topology hiện "This deployment is a standalone". Đó là các nhánh code có
+  # thật trong app (và docs/MONGO_E2E.md có kiểm tra), nên giữ lại một instance
+  # standalone để bấm qua bấm lại giữa hai chế độ.
+  #
+  # Không keyfile, không --replSet → dùng entrypoint gốc, đơn giản hơn hẳn 2
+  # service trên. Có seed đầy đủ để duyệt dữ liệu như thường; KHÔNG chạy
+  # 03-warmup.js (Profiler/Index Usage sẽ trống — đúng tinh thần "instance tối
+  # giản để so sánh capability", xem README).
+  mongodb-standalone:
+    image: mongo:7
+    profiles: ["standalone", "all"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: jdb
+      MONGO_INITDB_ROOT_PASSWORD: jdbtest
+      MONGO_INITDB_DATABASE: jdb_dev
+    ports:
+      - "27019:27017"
+    volumes:
+      - ./db/seeds/mongodb/01-seed.js:/docker-entrypoint-initdb.d/01-seed.js:ro
+      - ./db/seeds/mongodb/02-features.js:/docker-entrypoint-initdb.d/02-features.js:ro
+
+  # ── Bộ sinh ghi cho Change Tail ────────────────────────────────────────────
+  # Change stream chỉ hiện sự kiện xảy ra TRONG LÚC stream đang mở, nên không seed
+  # tĩnh nào làm tab này "có sẵn dữ liệu" được. Service này chạy watch-demo.js
+  # (insert → update có cả $set lẫn $unset → delete) để feed luôn có gì đó chảy.
+  #
+  # Gắn profile riêng nên KHÔNG chạy mặc định — bật khi cần demo:
+  #   docker compose --profile mongo-writer up -d mongodb-writer
+  #   docker compose stop mongodb-writer
+  mongodb-writer:
+    image: mongo:7
+    profiles: ["mongo-writer"]
+    depends_on:
+      - mongodb
+    restart: "no"
+    volumes:
+      - ./db/seeds/mongodb/watch-demo.js:/seed/watch-demo.js:ro
+    entrypoint: ["bash", "-c"]
+    command:
+      - >
+        until mongosh "mongodb://jdb:jdbtest@mongodb:27017/?authSource=admin&directConnection=true" --quiet --eval "db.runCommand({ping:1})" >/dev/null 2>&1; do sleep 1; done;
+        mongosh "mongodb://jdb:jdbtest@mongodb:27017/jdb_dev?authSource=admin&directConnection=true" --quiet /seed/watch-demo.js
 
   redis:
     image: redis:7
@@ -148,7 +314,7 @@ services:
   # sslrootcert = secure/tls/ca.crt (chỉ cần khi client chọn verify-ca/verify-full).
   postgres-tls:
     image: postgres:16
-    profiles: ["secure"]
+    profiles: ["secure", "all"]
     user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
     environment:
       POSTGRES_USER: jdb
@@ -169,7 +335,7 @@ services:
   # bị TỪ CHỐI dù mật khẩu đúng. Dùng để thấy rõ tác dụng của Client Auth.
   postgres-mtls:
     image: postgres:16
-    profiles: ["secure"]
+    profiles: ["secure", "all"]
     user: root # entrypoint gốc tự gosu xuống postgres sau khi ta sửa quyền key
     environment:
       POSTGRES_USER: jdb
@@ -190,7 +356,7 @@ services:
   # (init qua unix socket được miễn nên dữ liệu mẫu vẫn nạp bình thường).
   mysql-tls:
     image: mysql:8
-    profiles: ["secure"]
+    profiles: ["secure", "all"]
     environment:
       MYSQL_ROOT_PASSWORD: jdbtest
       MYSQL_DATABASE: jdb_dev
@@ -228,7 +394,7 @@ services:
   # One-shot: nạp dữ liệu mẫu vào redis-tls qua kết nối TLS rồi thoát.
   redis-tls-seed:
     image: redis:7
-    profiles: ["secure"]
+    profiles: ["secure", "all"]
     depends_on:
       - redis-tls
     volumes:
@@ -249,7 +415,7 @@ services:
   # CSDL nội bộ — không có "ports:" nên host KHÔNG truy cập trực tiếp được.
   internal-postgres:
     image: postgres:16
-    profiles: ["ssh"]
+    profiles: ["ssh", "all"]
     environment:
       POSTGRES_USER: jdb
       POSTGRES_PASSWORD: jdbtest
@@ -263,7 +429,7 @@ services:
   # bật sẵn để forward TCP tới internal-postgres trong network.
   bastion:
     build: ./secure/bastion
-    profiles: ["ssh"]
+    profiles: ["ssh", "all"]
     ports:
       - "2222:2222"
     depends_on:
